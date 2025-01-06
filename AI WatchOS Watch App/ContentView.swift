@@ -58,12 +58,14 @@ struct ContentView: View {
                 Text(responseText)
                     .padding()
                     .foregroundStyle(.white)
+                    .background(.blue)
                     .cornerRadius(8)
                     .shadow(radius: 5)
                     .padding()
+                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 100, maxHeight: .infinity)
             }
             
-            Spacer()
+
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
@@ -85,7 +87,7 @@ struct ContentView: View {
         let payload: [String: Any] = [
             "model": "llama-3.1-sonar-small-128k-online",
             "messages": [
-                ["role": "system", "content": "Be precise and concise."],
+                ["role": "system", "content": "Your name is \(assistantName) and you are a WatchOS assitant on the users wrist, act like you are having a normal conversation with the user, and answer any questions the user asks. Be a helpful useful assistant and remember your name is \(assistantName) do not go by anything else and correct the user if they adress you incorectly"],
                 ["role": "user", "content": userPrompt]
             ],
             "max_tokens": 100,
