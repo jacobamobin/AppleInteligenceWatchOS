@@ -4,8 +4,6 @@
 <dict>
 	<key>CFBundleSpokenName</key>
 	<string></string>
-	<key>NSAccessibilityUsageDescription</key>
-	<string></string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
