@@ -31,4 +31,4 @@ By submitting a pull request or otherwise contributing to this repository, you i
 
 The maintainer reserves the right to distribute a proprietary version of this software. The proprietary version may include features and branding not available in the open-source version. This version will be governed by a separate, non-open-source license.
 
-For inquiries about the proprietary version, contact [maintainer_email@example.com].
+For inquiries about the proprietary version, contact [jacobamobin@gmail.com].
