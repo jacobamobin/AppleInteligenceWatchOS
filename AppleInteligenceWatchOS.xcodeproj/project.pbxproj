@@ -33,7 +33,6 @@
 			isa = PBXGroup;
 			children = (
 				2C45566B2D2B466B0036C39F /* AI WatchOS Watch App */,
-				2C4556822D2B82EA0036C39F /* Frameworks */,
 				2C4556502D2B45990036C39F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -44,13 +43,6 @@
 				2C4556672D2B466B0036C39F /* AI WatchOS Watch App.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		2C4556822D2B82EA0036C39F /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
