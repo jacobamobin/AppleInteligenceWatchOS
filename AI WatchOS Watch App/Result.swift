@@ -6,120 +6,173 @@
 //
 
 import SwiftUI
-import AVFoundation
+import Foundation
 
 struct Result: View {
-    @State private var isSpeaking = false
-    @State private var errorMessage: String?
+    let assistantName: String = "Jarvis"
+    let perplexityApiKey: String = loadAPIKey() ?? ""
+    
+    @State private var userPrompt: String = ""  // State variable for user input
+    @State private var responseText: String = "Response will appear here."
+    @State private var isLoading: Bool = false // Loading state to disable UI during API calls
+    
+    var body: some View {
+        VStack {
+            // Header
+            HStack {
+                Text(assistantName)
+                    .font(.headline)
+                    .padding(.leading)
+                Spacer()
+            }
+            .padding(.top, 17)
+            
+            Spacer()
+            
+            // User Prompt Input
+            VStack {
+                TextField("Enter your prompt", text: $userPrompt)
+                    .padding()
+                    .textFieldStyle(.automatic) // Improved styling
+                
+                Button(action: {
+                    sendRequest(userPrompt: userPrompt) // Send the user input
+                }) {
+                    if isLoading {
+                        ProgressView() // Show a loading spinner while waiting for a response
+                            .progressViewStyle(CircularProgressViewStyle())
+                            .padding()
+                    } else {
+                        Text("Send Prompt")
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.green)
+                            .cornerRadius(8)
+                    }
+                }
+                .disabled(isLoading || userPrompt.isEmpty) // Disable button if loading or input is empty
+            }
+            .padding()
+            
+            // Response Text
+            ScrollView {
+                Text(responseText)
+                    .padding()
+                    .foregroundStyle(.white)
+                    .background(.blue)
+                    .cornerRadius(8)
+                    .shadow(radius: 5)
+                    .padding()
+                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 100, maxHeight: .infinity)
+            }
+            
 
-    func fetchSpeechFromGoogle(text: String, apiKey: String) {
-        guard let url = URL(string: "https://texttospeech.googleapis.com/v1/text:synthesize?key=\(apiKey)") else {
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea()
+        .background(Color(UIColor.black)) // Background color for better contrast
+    }
+    
+    // Function to send a request to Perplexity API
+    func sendRequest(userPrompt: String) {
+        guard let url = URL(string: "https://api.perplexity.ai/chat/completions") else {
             print("Invalid URL")
             return
         }
-
-        let requestBody: [String: Any] = [
-            "input": ["text": text],
-            "voice": [
-                "languageCode": "en-US",
-                "name": "en-US-Wavenet-D"
-            ],
-            "audioConfig": [
-                "audioEncoding": "MP3"
-            ]
-        ]
-
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: requestBody) else {
-            print("Failed to create JSON request body")
-            return
-        }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.addValue("Bearer \(perplexityApiKey)", forHTTPHeaderField: "Authorization")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jsonData
-
+        
+        let payload: [String: Any] = [
+            "model": "llama-3.1-sonar-small-128k-online",
+            "messages": [
+                ["role": "system", "content": "Your name is \(assistantName) and you are a WatchOS assitant on the users wrist, act like you are having a normal conversation with the user, and answer any questions the user asks. Be a helpful useful assistant and remember your name is \(assistantName)"],
+                ["role": "user", "content": userPrompt]
+            ],
+            "max_tokens": 100,
+            "temperature": 0.2,
+            "top_p": 0.9,
+            "search_domain_filter": ["perplexity.ai"],
+            "return_images": false,
+            "return_related_questions": false,
+            "search_recency_filter": "month",
+            "top_k": 0,
+            "stream": false,
+            "presence_penalty": 0,
+            "frequency_penalty": 1
+        ]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [])
+        } catch {
+            print("Error serializing JSON payload: \(error.localizedDescription)")
+            return
+        }
+        
+        isLoading = true // Set loading state
+        
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
-                if let error = error {
-                    print("Request Error: \(error.localizedDescription)")
-                    return
+                self.isLoading = false // Reset loading state
+            }
+            
+            if let error = error {
+                print("Error making API call: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.responseText = "Error: \(error.localizedDescription)"
                 }
-
-                guard let data = data,
-                      let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                      let audioContent = json["audioContent"] as? String else {
-                    print("Failed to parse JSON response")
-                    return
+                return
+            }
+            
+            guard let data = data else {
+                print("No data received")
+                DispatchQueue.main.async {
+                    self.responseText = "Error: No data received from server."
                 }
-
-                guard let audioData = Data(base64Encoded: audioContent) else {
-                    print("Failed to decode Base64 audioContent")
-                    return
+                return
+            }
+            
+            do {
+                if let responseObject = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    if let choices = responseObject["choices"] as? [[String: Any]],
+                       let firstChoice = choices.first,
+                       let message = firstChoice["message"] as? [String: Any],
+                       let content = message["content"] as? String {
+                        DispatchQueue.main.async {
+                            self.responseText = content
+                        }
+                    } else {
+                        print("Unable to decode response JSON structure.")
+                        DispatchQueue.main.async {
+                            self.responseText = "Error decoding response."
+                        }
+                    }
+                } else {
+                    print("Response is not valid JSON.")
+                    DispatchQueue.main.async {
+                        self.responseText = "Error parsing server response."
+                    }
                 }
-
-                let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent("ttsAudio.mp3")
-                do {
-                    try audioData.write(to: fileURL)
-                    print("Audio saved to: \(fileURL.path)")
-
-                    // Debugging: Print the length of the MP3 file in bytes
-                    print("MP3 file size: \(audioData.count) bytes")
-
-                    let audioPlayer = try AVAudioPlayer(data: audioData)
-                    audioPlayer.play()
-                    print("Audio playback started")
-                } catch {
-                    print("Error: \(error.localizedDescription)")
+            } catch {
+                print("Error decoding JSON response: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.responseText = "Error decoding server response."
                 }
             }
         }.resume()
     }
 
+}
 
-
-    func playAudio(base64String: String) {
-        guard let audioData = Data(base64Encoded: base64String) else {
-            errorMessage = "Invalid audio data"
-            return
-        }
-
-        do {
-            let audioPlayer = try AVAudioPlayer(data: audioData)
-            audioPlayer.play()
-        } catch {
-            errorMessage = "Failed to play audio: \(error.localizedDescription)"
-        }
+func loadAPIKey() -> String? {
+    if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
+       let config = NSDictionary(contentsOfFile: path),
+       let apiKey = config["PerplexityAPIKey"] as? String {
+        return apiKey
     }
-
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("Google TTS Integration")
-                .font(.title)
-                .padding()
-
-            if let errorMessage = errorMessage {
-                Text("Error: \(errorMessage)")
-                    .foregroundColor(.red)
-                    .padding()
-            }
-
-            Button(action: {
-                let sampleText = "This is a test of text to speech"
-                let apiKey = "AIzaSyCDS1NQhq0koXjvExL_070RsKy7y7fKVPo" // Replace with your actual API key
-                fetchSpeechFromGoogle(text: sampleText, apiKey: apiKey)
-            }) {
-                Text(isSpeaking ? "Speaking..." : "Speak with Google TTS")
-                    .font(.headline)
-                    .padding()
-                    .foregroundColor(.white)
-                    .background(isSpeaking ? Color.gray : Color.blue)
-                    .cornerRadius(10)
-            }
-            .disabled(isSpeaking)
-        }
-        .padding()
-    }
+    return nil
 }
 
 #Preview {
