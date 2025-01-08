@@ -16,12 +16,12 @@ struct ContentView: View {
             // Microphone view
             ZStack {
                 Button { } label: {
-                    GlowEffect()
+                    GlowEffect() // Assuming GlowEffect is defined elsewhere
                 }
                 .foregroundStyle(Color.clear)
                 .onLongPressGesture(minimumDuration: 1.0, pressing: { isPressing in
                     if isPressing {
-                        Microphone.startRecording()
+                        Microphone.startRecording() // Assuming Microphone is set up
                     } else {
                         Microphone.stopRecording { text in
                             recognizedText = text // Capture transcribed text
@@ -35,7 +35,6 @@ struct ContentView: View {
             ScrollView {
                 Text(sendRequest(userPrompt: recognizedText))
             }
-            
         }
     }
 }
@@ -43,5 +42,3 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
-
-
