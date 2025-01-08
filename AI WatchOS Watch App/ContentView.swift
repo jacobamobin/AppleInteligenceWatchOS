@@ -6,10 +6,11 @@
 //
 
 import SwiftUI
+import Foundation
 
 struct ContentView: View {
-    let assistantName: String = "Aria"
-    let perplexityApiKey: String = "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" // Replace with your actual API key
+    let assistantName: String = "Jarvis"
+    let perplexityApiKey: String = loadAPIKey() ?? ""
     
     @State private var userPrompt: String = ""  // State variable for user input
     @State private var responseText: String = "Response will appear here."
@@ -87,7 +88,7 @@ struct ContentView: View {
         let payload: [String: Any] = [
             "model": "llama-3.1-sonar-small-128k-online",
             "messages": [
-                ["role": "system", "content": "Your name is \(assistantName) and you are a WatchOS assitant on the users wrist, act like you are having a normal conversation with the user, and answer any questions the user asks. Be a helpful useful assistant and remember your name is \(assistantName) do not go by anything else and correct the user if they adress you incorectly"],
+                ["role": "system", "content": "Your name is \(assistantName) and you are a WatchOS assitant on the users wrist, act like you are having a normal conversation with the user, and answer any questions the user asks. Be a helpful useful assistant and remember your name is \(assistantName)"],
                 ["role": "user", "content": userPrompt]
             ],
             "max_tokens": 100,
@@ -162,6 +163,16 @@ struct ContentView: View {
             }
         }.resume()
     }
+
+}
+
+func loadAPIKey() -> String? {
+    if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
+       let config = NSDictionary(contentsOfFile: path),
+       let apiKey = config["PerplexityAPIKey"] as? String {
+        return apiKey
+    }
+    return nil
 }
 
 #Preview {

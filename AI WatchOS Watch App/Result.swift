@@ -63,6 +63,9 @@ struct Result: View {
                     try audioData.write(to: fileURL)
                     print("Audio saved to: \(fileURL.path)")
 
+                    // Debugging: Print the length of the MP3 file in bytes
+                    print("MP3 file size: \(audioData.count) bytes")
+
                     let audioPlayer = try AVAudioPlayer(data: audioData)
                     audioPlayer.play()
                     print("Audio playback started")
@@ -102,8 +105,8 @@ struct Result: View {
             }
 
             Button(action: {
-                let sampleText = "Hello, this is a test of Google's Text-to-Speech API."
-                let apiKey = "AIzaSyA5_icYUR-lBoa3gOZc6L6dWJ_Y1P_EYSw" // Replace with your actual API key
+                let sampleText = "This is a test of text to speech"
+                let apiKey = "AIzaSyCDS1NQhq0koXjvExL_070RsKy7y7fKVPo" // Replace with your actual API key
                 fetchSpeechFromGoogle(text: sampleText, apiKey: apiKey)
             }) {
                 Text(isSpeaking ? "Speaking..." : "Speak with Google TTS")

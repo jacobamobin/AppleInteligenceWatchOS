@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2C45568C2D2DEDE60036C39F /* OpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = 2C45568B2D2DEDE60036C39F /* OpenAI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		2C4556672D2B466B0036C39F /* AI WatchOS Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AI WatchOS Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C45568C2D2DEDE60036C39F /* OpenAI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = "AI WatchOS Watch App";
 			packageProductDependencies = (
+				2C45568B2D2DEDE60036C39F /* OpenAI */,
 			);
 			productName = "AI WatchOS Watch App";
 			productReference = 2C4556672D2B466B0036C39F /* AI WatchOS Watch App.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = 2C4556462D2B45990036C39F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2C45568A2D2DEDE60036C39F /* XCRemoteSwiftPackageReference "OpenAI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2C4556502D2B45990036C39F /* Products */;
 			projectDirPath = "";
@@ -332,6 +341,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2C45568A2D2DEDE60036C39F /* XCRemoteSwiftPackageReference "OpenAI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MacPaw/OpenAI.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2C45568B2D2DEDE60036C39F /* OpenAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2C45568A2D2DEDE60036C39F /* XCRemoteSwiftPackageReference "OpenAI" */;
+			productName = OpenAI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2C4556472D2B45990036C39F /* Project object */;
 }

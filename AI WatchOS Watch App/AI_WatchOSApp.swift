@@ -11,7 +11,7 @@ import SwiftUI
 struct AI_WatchOS_Watch_AppApp: App {
     var body: some Scene {
         WindowGroup {
-            Result()
+            Microphone()
         }
     }
 }
