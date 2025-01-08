@@ -9,19 +9,19 @@ import SwiftUI
 import AVFoundation
 import OpenAI
 
-struct TTS {
-    @State private var isPlaying = false
-    @State private var audioPlayer: AVAudioPlayer?
-    @State private var errorMessage: String?
-    
-    let openAI = OpenAI(apiToken: getChatGPTKeyB() ?? "")
+// MARK: - TTS Class
+class TTS: ObservableObject {
+    @Published var isPlaying = false
+    @Published var errorMessage: String?
 
-    // This view does not display anything but only handles audio playback
-    func generateAndPlayAudio(from text: String) {
+    private var audioPlayer: AVAudioPlayer?
+    private let openAI = OpenAI(apiToken: getChatGPTKey() ?? "")
+
+    public func generateAndPlayAudio(from text: String) {
         isPlaying = true
         errorMessage = nil
 
-        // Set up the audio session to ensure audio plays through the watch speaker
+        // Set up the audio session
         setupAudioSession()
 
         // Create query for audio generation
@@ -38,7 +38,7 @@ struct TTS {
                 // Generate audio using OpenAI's API
                 let result = try await openAI.audioCreateSpeech(query: query)
 
-                // Directly access audio data since it's non-optional
+                // Play audio data
                 try playAudio(data: result.audio)
             } catch {
                 DispatchQueue.main.async {
@@ -70,15 +70,6 @@ struct TTS {
             print("Failed to initialize AVAudioPlayer: \(error)")
         }
     }
-}
-
-func getChatGPTKeyB() -> String? {
-    if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
-       let config = NSDictionary(contentsOfFile: path),
-       let apiKey = config["ChatGPT"] as? String {
-        return apiKey
-    }
-    return nil
 }
 
 

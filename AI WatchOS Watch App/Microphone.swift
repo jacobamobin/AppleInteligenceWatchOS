@@ -96,7 +96,7 @@ struct Microphone {
     }
 }
 
-func getChatGPTKey() -> String? {
+public func getChatGPTKey() -> String? {
     if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
        let config = NSDictionary(contentsOfFile: path),
        let apiKey = config["ChatGPT"] as? String {

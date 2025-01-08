@@ -13,6 +13,8 @@ struct ContentView: View {
     @State private var state = false // State to toggle between views
     @State private var recognizedText = "" // Holds the transcribed text from Microphone
     @State private var tts = TTS() // Instance of TTS
+    @State private var displayText = ""
+    @State private var rewriteText = ""
 
     var body: some View {
         ZStack {
@@ -32,13 +34,14 @@ struct ContentView: View {
                                 withAnimation { // Smooth transition to Result view
                                     state = true // Transition to Result view
                                 }
+                                // Fetch displayText after recording stops
+                                displayText = sendRequest(userPrompt: recognizedText)
                             }
                         }
                     }, perform: {})
                 }
                 .transition(.opacity) // Fade out effect
             } else {
-                // Result view with smooth transition
                 VStack {
                     Button {
                         withAnimation {
@@ -46,7 +49,7 @@ struct ContentView: View {
                         }
                     } label: {
                         ScrollView {
-                            Text(sendRequest(userPrompt: recognizedText))
+                            Text(displayText)
                                 .multilineTextAlignment(.leading)
                                 .foregroundStyle(Color.white)
                         }
@@ -58,11 +61,12 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: state) // Apply animation to the state change
-        .onChange(of: recognizedText) { newText in
-            // Trigger TTS to play audio when recognizedText is updated
+        .onChange(of: displayText) { newText in
+            // Trigger TTS to play audio when `displayText` is updated
             if !newText.isEmpty {
-                tts.generateAndPlayAudio(from: newText)
+                tts.generateAndPlayAudio(from: displayText)
             }
+            print(displayText)
         }
     }
 }
@@ -70,4 +74,3 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
-
