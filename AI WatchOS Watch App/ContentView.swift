@@ -61,7 +61,7 @@ struct ContentView: View {
         .onChange(of: recognizedText) { newText in
             // Trigger TTS to play audio when recognizedText is updated
             if !newText.isEmpty {
-                tts.generateAndPlayAudio(from: recognizedText)
+                tts.generateAndPlayAudio(from: newText)
             }
         }
     }
