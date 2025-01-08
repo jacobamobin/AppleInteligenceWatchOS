@@ -4,71 +4,27 @@
 //
 //  Created by Jacob Mobin on 2025-01-05.
 //
-
-import SwiftUI
+import Foundation
 import AVFoundation
 import OpenAI
 
-struct Microphone: View {
-    @State private var recognizedText = "Hold the button and start speaking..."
-    @State private var isRecording = false
-    @State private var audioRecorder: AVAudioRecorder?
-    @State private var audioFileURL: URL?
-    @State private var isLoading = false
+struct Microphone {
+    static var audioRecorder: AVAudioRecorder?
+    static var audioFileURL: URL?
+    static let openAI = OpenAI(apiToken: getChatGPTKey() ?? "")
 
-    let openAI = OpenAI(apiToken: getChatGPTKey() ?? "")
-
-    var body: some View {
-        VStack {
-            // Display the recognized text
-            ScrollView {
-                Text(recognizedText)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.black.opacity(0.8))
-                    .cornerRadius(10)
-                    .multilineTextAlignment(.center)
-            }
-            .frame(height: 100)
-            .padding()
-
-            // Recording button
-            Button(action: {}) { // Empty action as long-press gesture handles recording
-                Text(isRecording ? "Release to Stop" : "Hold to Speak")
-                    .padding()
-                    .background(isRecording ? Color.red : Color.blue)
-                    .foregroundColor(.white)
-                    .clipShape(Capsule())
-            }
-            .onLongPressGesture(minimumDuration: .infinity, pressing: { isPressing in
-                if isPressing {
-                    startRecording()
-                } else {
-                    stopRecording()
-                }
-            }, perform: {})
-        }
-        .padding()
-        .onAppear {
-            setupAudioSession()
-        }
-    }
-
-    private func setupAudioSession() {
+    static func setupAudioSession() {
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.playAndRecord, mode: .default)
             try audioSession.setActive(true)
         } catch {
-            recognizedText = "Audio session setup failed: \(error.localizedDescription)"
+            print("Audio session setup failed: \(error.localizedDescription)")
         }
     }
 
-    private func startRecording() {
-        isRecording = true
-        recognizedText = "Listening..."
-        WKInterfaceDevice.current().play(.start)
-
+    static func startRecording() {
+        setupAudioSession()
         let tempDir = FileManager.default.temporaryDirectory
         let audioFileName = UUID().uuidString + ".m4a"
         let audioFilePath = tempDir.appendingPathComponent(audioFileName)
@@ -86,46 +42,38 @@ struct Microphone: View {
             audioRecorder?.prepareToRecord()
             audioRecorder?.record()
         } catch {
-            recognizedText = "Recording failed: \(error.localizedDescription)"
-            isRecording = false
+            print("Recording failed: \(error.localizedDescription)")
         }
     }
 
-    private func stopRecording() {
-        isRecording = false
-        WKInterfaceDevice.current().play(.stop)
-        recognizedText = "Processing..."
-        isLoading = true // Show loading indicator
-
+    static func stopRecording(completion: @escaping (String) -> Void) {
         audioRecorder?.stop()
-        guard let audioFileURL = audioFileURL else { return }
+        guard let audioFileURL = audioFileURL else {
+            completion("Error: No audio file found")
+            return
+        }
 
         Task {
             do {
                 let transcription = try await transcribeAudio(audioFileURL: audioFileURL)
                 DispatchQueue.main.async {
-                    recognizedText = transcription
-                    isLoading = false // Hide loading indicator
+                    completion(transcription)
                 }
                 // Clean up audio file
                 try FileManager.default.removeItem(at: audioFileURL)
             } catch {
                 DispatchQueue.main.async {
-                    recognizedText = "Error: \(error.localizedDescription)"
-                    isLoading = false // Hide loading indicator
+                    completion("Error: \(error.localizedDescription)")
                 }
             }
         }
     }
 
-    private func transcribeAudio(audioFileURL: URL) async throws -> String {
-        // Step 1: Load audio data from file
+    private static func transcribeAudio(audioFileURL: URL) async throws -> String {
         let data = try Data(contentsOf: audioFileURL)
 
-        // Step 2: Derive file type from file extension
         let fileExtension = audioFileURL.pathExtension.lowercased()
         let fileType: AudioTranscriptionQuery.FileType
-
         switch fileExtension {
         case "m4a":
             fileType = .m4a
@@ -134,25 +82,19 @@ struct Microphone: View {
         case "wav":
             fileType = .wav
         default:
-            throw URLError(.unsupportedURL) // Handle unsupported file types
+            throw URLError(.unsupportedURL)
         }
 
-        // Step 3: Create query for transcription
         let query = AudioTranscriptionQuery(
             file: data,
-            fileType: fileType, // Use the derived file type
-            model: .whisper_1 // Specify the model
+            fileType: fileType,
+            model: .whisper_1
         )
 
-        // Step 4: Call OpenAI's audio transcription API
         let result = try await openAI.audioTranscriptions(query: query)
-
-        // Step 5: Return transcribed text
         return result.text
     }
-
 }
-
 
 func getChatGPTKey() -> String? {
     if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
@@ -162,8 +104,3 @@ func getChatGPTKey() -> String? {
     }
     return nil
 }
-
-#Preview {
-    Microphone()
-}
-
