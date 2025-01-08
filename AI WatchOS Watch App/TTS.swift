@@ -9,38 +9,20 @@ import SwiftUI
 import AVFoundation
 import OpenAI
 
-struct TTS: View {
+struct TTS {
     @State private var isPlaying = false
     @State private var audioPlayer: AVAudioPlayer?
     @State private var errorMessage: String?
     
     let openAI = OpenAI(apiToken: getChatGPTKeyB() ?? "")
-    let demoSentence = "This is a demo sentence being converted to audio."
 
-    var body: some View {
-        VStack {
-            if let errorMessage = errorMessage {
-                Text("Error: \(errorMessage)")
-                    .foregroundColor(.red)
-                    .padding()
-            }
-            
-            Button(action: {
-                generateAndPlayAudio(from: demoSentence)
-            }) {
-                Text(isPlaying ? "Playing Audio..." : "Play Demo Sentence")
-                    .padding()
-                    .background(isPlaying ? Color.green : Color.blue)
-                    .foregroundColor(.white)
-                    .clipShape(Capsule())
-            }
-        }
-        .padding()
-    }
-
-    private func generateAndPlayAudio(from text: String) {
+    // This view does not display anything but only handles audio playback
+    func generateAndPlayAudio(from text: String) {
         isPlaying = true
         errorMessage = nil
+
+        // Set up the audio session to ensure audio plays through the watch speaker
+        setupAudioSession()
 
         // Create query for audio generation
         let query = AudioSpeechQuery(
@@ -69,10 +51,24 @@ struct TTS: View {
         }
     }
 
+    private func setupAudioSession() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .default, options: .mixWithOthers)
+            try session.setActive(true)
+        } catch {
+            print("Failed to set up audio session: \(error)")
+        }
+    }
+
     private func playAudio(data: Data) throws {
-        audioPlayer = try AVAudioPlayer(data: data)
-        audioPlayer?.prepareToPlay()
-        audioPlayer?.play()
+        do {
+            audioPlayer = try AVAudioPlayer(data: data)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("Failed to initialize AVAudioPlayer: \(error)")
+        }
     }
 }
 
@@ -85,7 +81,6 @@ func getChatGPTKeyB() -> String? {
     return nil
 }
 
-#Preview {
-    TTS()
-}
+
+
 
