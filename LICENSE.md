@@ -4,6 +4,8 @@
 
 This project is licensed under the GNU Affero General Public License (AGPL) version 3.0. 
 You may use, modify, and distribute this software under the terms of the AGPL, which ensures that any modifications or derivative works are also shared under the same license if distributed or provided as a service.
+You may not use this project in a commerical setting, or for financial gain.
+
 
 For more details, see the [GNU AGPL v3.0 license](https://www.gnu.org/licenses/agpl-3.0.html).
 
