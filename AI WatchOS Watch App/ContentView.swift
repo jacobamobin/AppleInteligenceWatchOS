@@ -8,6 +8,7 @@
 import SwiftUI
 import AVFoundation
 import Foundation
+import OpenAI
 
 struct ContentView: View {
     @State private var state = false // State to toggle between views
@@ -64,7 +65,7 @@ struct ContentView: View {
         .onChange(of: displayText) { newText in
             // Trigger TTS to play audio when `displayText` is updated
             if !newText.isEmpty {
-                tts.generateAndPlayAudio(from: sendRewriteRequest(prompt: displayText))
+                tts.generateAndPlayAudio(from: sendRewriteRequest(prompt: displayText), voice: ".alloy")
             }
             print(displayText)
         }

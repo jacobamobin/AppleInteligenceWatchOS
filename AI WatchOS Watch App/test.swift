@@ -11,7 +11,7 @@ struct test: View {
     @State private var tts = TTS() // Instance of TTS
     var body: some View {
         Button {
-            tts.generateAndPlayAudio(from: "Hello what is your name jacob")
+            tts.generateAndPlayAudio(from: "Hello what is your name jacob", voice: ".alloy")
         } label: {
             Text("Hello")
         }

@@ -17,7 +17,7 @@ class TTS: ObservableObject {
     private var audioPlayer: AVAudioPlayer?
     private let openAI = OpenAI(apiToken: getChatGPTKey() ?? "")
 
-    public func generateAndPlayAudio(from text: String) {
+    public func generateAndPlayAudio(from text: String, voice: String) {
         isPlaying = true
         errorMessage = nil
 
@@ -25,10 +25,12 @@ class TTS: ObservableObject {
         setupAudioSession()
 
         // Create query for audio generation
+        let selectedVoice = mapVoiceToEnum(voice: voice)
+
         let query = AudioSpeechQuery(
             model: .tts_1,
             input: text,
-            voice: .alloy,
+            voice: selectedVoice,
             responseFormat: .mp3, // Request mp3 format
             speed: 1.0
         )
@@ -50,6 +52,27 @@ class TTS: ObservableObject {
             }
         }
     }
+
+    // Helper method to map the voice string to the correct enum value
+    private func mapVoiceToEnum(voice: String) -> AudioSpeechQuery.AudioSpeechVoice {
+        switch voice {
+        case ".alloy":
+            return .alloy
+        case ".echo":
+            return .echo
+        case ".fable":
+            return .fable
+        case ".onyx":
+            return .onyx
+        case ".nova":
+            return .nova
+        case ".shimmer":
+            return .shimmer
+        default:
+            return .alloy // Default voice if no match is found
+        }
+    }
+
 
     private func setupAudioSession() {
         do {
