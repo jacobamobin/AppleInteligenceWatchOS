@@ -11,6 +11,8 @@ import Foundation
 import OpenAI
 
 struct ContentView: View {
+    @State private var assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
+    @State private var selectedVoice: String = UserDefaults.standard.string(forKey: "SelectedVoice") ?? ".alloy"
     @State private var state = false // State to toggle between views
     @State private var recognizedText = "" // Holds the transcribed text from Microphone
     @State private var tts = TTS() // Instance of TTS
@@ -23,7 +25,11 @@ struct ContentView: View {
                 // Microphone view with smooth transition
                 VStack {
                     Button { } label: {
-                        GlowEffect() 
+                        ZStack {
+                            
+                            GlowEffect()
+                        }
+                        
                     }
                     .foregroundStyle(Color.clear)
                     .onLongPressGesture(minimumDuration: 0.3, pressing: { isPressing in
@@ -62,10 +68,14 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: state) // Apply animation to the state change
+        .onAppear {
+            // Ensure selected voice is updated when the view appears
+            selectedVoice = UserDefaults.standard.string(forKey: "SelectedVoice") ?? ".alloy"
+        }
         .onChange(of: displayText) { newText in
             // Trigger TTS to play audio when `displayText` is updated
             if !newText.isEmpty {
-                tts.generateAndPlayAudio(from: sendRewriteRequest(prompt: displayText), voice: ".alloy")
+                tts.generateAndPlayAudio(from: sendRewriteRequest(prompt: displayText), voice: selectedVoice)
             }
             print(displayText)
         }
@@ -75,3 +85,4 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+

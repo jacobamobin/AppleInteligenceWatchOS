@@ -10,7 +10,7 @@ import Foundation
 // Uses Perplexity API
 func sendRequest(userPrompt: String) -> String {
     let apiKey: String = loadAPIKey() ?? "Invalid API Key"
-    let assistantName: String = "Jarvis"
+    let assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
     
     guard let url = URL(string: "https://api.perplexity.ai/chat/completions") else {
         print("Invalid URL")

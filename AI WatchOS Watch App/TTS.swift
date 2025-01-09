@@ -32,7 +32,7 @@ class TTS: ObservableObject {
             input: text,
             voice: selectedVoice,
             responseFormat: .mp3, // Request mp3 format
-            speed: 1.0
+            speed: 1.15
         )
 
         Task {

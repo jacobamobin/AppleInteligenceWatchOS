@@ -8,11 +8,10 @@
 import SwiftUI
 
 struct Settings: View {
-    @State private var assistantName: String = ""
-    @State private var selectedOption: Int = 0
+    @State private var assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
+    @State private var selectedOption: Int = UserDefaults.standard.integer(forKey: "SelectedOption")
     @State private var tts = TTS()
     @State private var showPrivacyPolicy = false
-    @State private var showRestorePurchases = false
     
     let demoOptions = ["Alloy": ".alloy", "Echo": ".echo", "Fable": ".fable", "Onyx": ".onyx", "Nova": ".nova", "Shimmer": ".shimmer"]
     
@@ -20,8 +19,14 @@ struct Settings: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 AssistantNameInput(assistantName: $assistantName)
+                    .onChange(of: assistantName) { newValue in
+                        saveAssistantName(newValue)
+                    }
                 
                 AssistantVoiceSelector(selectedOption: $selectedOption, demoOptions: demoOptions, assistantName: assistantName, tts: tts)
+                    .onChange(of: selectedOption) { newValue in
+                        saveSelectedOption(newValue)
+                    }
                 
                 SettingsButton(title: "Privacy Policy", action: {
                     showPrivacyPolicy.toggle()
@@ -55,7 +60,6 @@ struct Settings: View {
     }
     
     func restorePurchases() {
-        // Implement restore purchases functionality here
         print("Restoring purchases...")
     }
     
@@ -63,6 +67,14 @@ struct Settings: View {
         if let url = URL(string: "https://github.com") {
             // UIApplication.shared.open(url)
         }
+    }
+    
+    func saveAssistantName(_ name: String) {
+        UserDefaults.standard.set(name, forKey: "AssistantName")
+    }
+    
+    func saveSelectedOption(_ option: Int) {
+        UserDefaults.standard.set(option, forKey: "SelectedOption")
     }
 }
 
@@ -95,6 +107,7 @@ struct AssistantVoiceSelector: View {
                     HStack {
                         VoiceButton(title: demoOptions.keys.sorted()[index], selected: selectedOption == index) {
                             selectedOption = index
+                            UserDefaults.standard.set(demoOptions.values.sorted()[index], forKey: "SelectedVoice")
                         }
                         
                         PlayButton {
@@ -165,7 +178,7 @@ struct PrivacyPolicyView: View {
                 .font(.headline)
                 .padding(.top)
             ScrollView {
-                Text("Assistant for apple watch sends all your queries to ChatGPT (Voice) and Perplexity (Text). Therefore this application's privacy is governed by OpenAI's privacy policy and Perplexity's privacy policy. This app does not collect any personal information or data.")
+                Text("Assistant for Apple Watch sends all your queries to ChatGPT (Voice) and Perplexity (Text). Therefore this application's privacy is governed by OpenAI's privacy policy and Perplexity's privacy policy. This app does not collect any personal information or data.")
                     .padding()
             }
         }
