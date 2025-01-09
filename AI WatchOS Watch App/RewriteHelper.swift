@@ -110,8 +110,8 @@ public func sendRewriteRequest(prompt: String) -> String {
         }
     }
 
-    // Return the refactored text
-    return modifiedPrompt
+    // Return the refactored text, first 1000 charachters, so if it returns something massive the api doesnt kill itself
+    return String(modifiedPrompt.prefix(1000))
 }
 
 

@@ -18,28 +18,38 @@ struct ContentView: View {
     @State private var tts = TTS() // Instance of TTS
     @State private var displayText = ""
     @State private var rewriteText = ""
+    @State private var isPressed = false
 
     var body: some View {
         ZStack {
             if !state {
                 // Microphone view with smooth transition
                 VStack {
-                    Button { } label: {
+                    Button {
+                        // Empty action for tap effect
+                    } label: {
                         ZStack {
-                            
+                            if isPressed {
+                                AssistantIcon()
+                                    .transition(.move(edge: .bottom).combined(with: .opacity)) // Animation for assistant icon
+                            } else {
+                                Clock()
+                                    .transition(.move(edge: .top).combined(with: .opacity)) // Animation for clock
+                            }
                             GlowEffect()
                         }
-                        
                     }
                     .foregroundStyle(Color.clear)
-                    .onLongPressGesture(minimumDuration: 0.3, pressing: { isPressing in
+                    .onLongPressGesture(minimumDuration: 0.2, pressing: { isPressing in
                         if isPressing {
-                            Microphone.startRecording() // Assuming Microphone is set up
+                            Microphone.startRecording() // Assuming Microphone is set
+                            isPressed = true
                         } else {
                             Microphone.stopRecording { text in
                                 recognizedText = text // Capture transcribed text
                                 withAnimation { // Smooth transition to Result view
                                     state = true // Transition to Result view
+                                    isPressed = false
                                 }
                                 // Fetch displayText after recording stops
                                 displayText = sendRequest(userPrompt: recognizedText)
@@ -85,4 +95,3 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
-
