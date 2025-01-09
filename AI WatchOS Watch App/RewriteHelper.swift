@@ -6,35 +6,115 @@
 //
 
 import Foundation
-import OpenAI
 
-func sendRewriteRequest(userPrompt: String) async throws -> String {
-    // Initialize OpenAI with your API key
-    let openAI = OpenAI(apiToken: getChatGPTKey() ?? "Invalid API Key")
-    let assistantName: String = "Jarvis"
-    
-    // Prepare the completion query
-    let query = CompletionsQuery(
-        model: .textDavinci_003,
-        prompt: "\(assistantName): \(userPrompt)",
-        temperature: 0.7,
-        maxTokens: 150,
-        topP: 1.0,
-        frequencyPenalty: 0.0,
-        presencePenalty: 0.0
-    )
-    
-    // Make the request and handle the result
-    do {
-        let result = try await openAI.completions(query: query)
-        if let choice = result.choices.first {
-            return choice.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        } else {
-            throw NSError(domain: "sendRequest", code: 0, userInfo: [NSLocalizedDescriptionKey: "No completions returned."])
+public func sendRewriteRequest(prompt: String) -> String {
+    // Function to process the prompt for TTS-friendly output
+
+    // Function to convert numbers to natural speech
+    func numberToWords(_ number: String) -> String {
+        guard let num = Int(number) else { return number }
+
+        let units = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+        let teens = ["", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"]
+        let tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+        let thousands = ["", "thousand", "million", "billion"]
+
+        func convertToWords(_ n: Int) -> String {
+            if n == 0 { return "zero" }
+
+            var n = n
+            var result = ""
+            var place = 0
+
+            while n > 0 {
+                let chunk = n % 1000
+                if chunk > 0 {
+                    let chunkText = convertChunk(chunk)
+                    let placeText = thousands[place]
+                    result = "\(chunkText) \(placeText) \(result)".trimmingCharacters(in: .whitespaces)
+                }
+                n /= 1000
+                place += 1
+            }
+
+            return result.trimmingCharacters(in: .whitespaces)
         }
-    } catch {
-        throw NSError(domain: "sendRequest", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to retrieve completion: \(error.localizedDescription)"])
+
+        func convertChunk(_ n: Int) -> String {
+            var n = n
+            var result = ""
+
+            if n >= 100 {
+                let hundredsPlace = n / 100
+                result += "\(units[hundredsPlace]) hundred "
+                n %= 100
+            }
+
+            if n >= 20 {
+                let tensPlace = n / 10
+                result += "\(tens[tensPlace]) "
+                n %= 10
+            } else if n > 10 {
+                result += "\(teens[n - 10]) "
+                n = 0
+            } else if n == 10 {
+                result += "ten "
+                n = 0
+            }
+
+            if n > 0 {
+                result += "\(units[n]) "
+            }
+
+            return result.trimmingCharacters(in: .whitespaces)
+        }
+
+        return convertToWords(num)
     }
+
+    // Dictionary for common replacements
+    let replacements: [String: String] = [
+        "%": " percent",
+        "°": " degree",
+        "&": " and",
+        "@": " at",
+        "$": " dollars",
+        "#": " number"
+    ]
+
+    // Regex patterns and corresponding transformations
+    let patterns: [(pattern: String, transform: (String) -> String)] = [
+        // Convert numbers to words
+        ("\\b\\d+\\b", numberToWords),
+
+        // Remove parentheses and brackets
+        ("[\\(\\)\\[\\]]", { _ in "" })
+    ]
+
+    // Perform replacements
+    var modifiedPrompt = prompt
+
+    // Direct replacements
+    for (key, value) in replacements {
+        modifiedPrompt = modifiedPrompt.replacingOccurrences(of: key, with: value)
+    }
+
+    // Pattern-based transformations
+    for (pattern, transform) in patterns {
+        let regex = try! NSRegularExpression(pattern: pattern)
+        let matches = regex.matches(in: modifiedPrompt, range: NSRange(modifiedPrompt.startIndex..., in: modifiedPrompt))
+        for match in matches.reversed() {
+            let matchRange = Range(match.range, in: modifiedPrompt)!
+            let matchText = String(modifiedPrompt[matchRange])
+            modifiedPrompt.replaceSubrange(matchRange, with: transform(matchText))
+        }
+    }
+
+    // Return the refactored text
+    return modifiedPrompt
 }
+
+
+
 
 

@@ -22,7 +22,7 @@ struct ContentView: View {
                 // Microphone view with smooth transition
                 VStack {
                     Button { } label: {
-                        GlowEffect() // Assuming GlowEffect is defined elsewhere
+                        GlowEffect() 
                     }
                     .foregroundStyle(Color.clear)
                     .onLongPressGesture(minimumDuration: 0.3, pressing: { isPressing in
@@ -64,7 +64,7 @@ struct ContentView: View {
         .onChange(of: displayText) { newText in
             // Trigger TTS to play audio when `displayText` is updated
             if !newText.isEmpty {
-                tts.generateAndPlayAudio(from: displayText)
+                tts.generateAndPlayAudio(from: sendRewriteRequest(prompt: displayText))
             }
             print(displayText)
         }
