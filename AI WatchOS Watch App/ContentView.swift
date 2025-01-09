@@ -13,7 +13,7 @@ import OpenAI
 struct ContentView: View {
     @State private var assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
     @State private var selectedVoice: String = UserDefaults.standard.string(forKey: "SelectedVoice") ?? ".alloy"
-    @State private var state = false // State to toggle between views
+    @State private var state = true // State to toggle between views
     @State private var recognizedText = "" // Holds the transcribed text from Microphone
     @State private var tts = TTS() // Instance of TTS
     @State private var displayText = ""
@@ -59,22 +59,23 @@ struct ContentView: View {
                 }
                 .transition(.opacity) // Fade out effect
             } else {
-                VStack {
-                    Button {
-                        withAnimation {
-                            state = false
-                        }
-                    } label: {
+                Button {
+                    withAnimation {
+                        state = false
+                    }
+                } label: {
+                    VStack {
+                        TopBar()
                         ScrollView {
                             Text(displayText)
                                 .multilineTextAlignment(.leading)
                                 .foregroundStyle(Color.white)
                         }
-                        
-                    }.foregroundStyle(Color.clear)
-                }
+                    }
+                    
+                    
+                }.foregroundStyle(Color.clear)
                 .ignoresSafeArea()
-                .padding(.top, 5)
             }
         }
         .animation(.easeInOut(duration: 0.2), value: state) // Apply animation to the state change
