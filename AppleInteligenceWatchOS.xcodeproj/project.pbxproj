@@ -10,7 +10,22 @@
 		2C45568C2D2DEDE60036C39F /* OpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = 2C45568B2D2DEDE60036C39F /* OpenAI */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		2C2662D92D31C9870024E088 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		2C2662C62D31C9860024E088 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		2C2662C82D31C9860024E088 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		2C4556672D2B466B0036C39F /* AI WatchOS Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AI WatchOS Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -34,10 +49,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2C2662C52D31C9860024E088 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2C2662C62D31C9860024E088 /* WidgetKit.framework */,
+				2C2662C82D31C9860024E088 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		2C4556462D2B45990036C39F = {
 			isa = PBXGroup;
 			children = (
 				2C45566B2D2B466B0036C39F /* AI WatchOS Watch App */,
+				2C2662C52D31C9860024E088 /* Frameworks */,
 				2C4556502D2B45990036C39F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -60,6 +85,7 @@
 				2C4556632D2B466B0036C39F /* Sources */,
 				2C4556642D2B466B0036C39F /* Frameworks */,
 				2C4556652D2B466B0036C39F /* Resources */,
+				2C2662D92D31C9870024E088 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
