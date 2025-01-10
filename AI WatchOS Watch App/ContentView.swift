@@ -54,7 +54,7 @@ struct ContentView: View {
                                     isPressed = false
                                 }
                                 // Fetch displayText after recording stops
-                                displayText = sendRequest(userPrompt: recognizedText)
+                                displayText = RemoveCitations(prompt: sendRequest(userPrompt: recognizedText))
                             }
                         }
                     }, perform: {})

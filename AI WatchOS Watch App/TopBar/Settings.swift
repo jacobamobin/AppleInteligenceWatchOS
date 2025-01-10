@@ -6,12 +6,15 @@
 //
 
 import SwiftUI
+import WatchKit
 
+// MARK: The main settings page view
 struct Settings: View {
     @State private var assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
     @State private var selectedOption: Int = UserDefaults.standard.integer(forKey: "SelectedOption")
     @State private var tts = TTS()
     @State private var showPrivacyPolicy = false
+    @State private var showTutorial = false  // Added state to track tutorial visibility
     
     let demoOptions = ["Alloy": ".alloy", "Echo": ".echo", "Fable": ".fable", "Onyx": ".onyx", "Nova": ".nova", "Shimmer": ".shimmer"]
     
@@ -27,6 +30,13 @@ struct Settings: View {
                     .onChange(of: selectedOption) { newValue in
                         saveSelectedOption(newValue)
                     }
+            }
+            .padding()
+            
+            VStack (spacing: 5){
+                SettingsButton(title: "How to Use", action: {
+                    showTutorial.toggle()  // Toggle tutorial visibility
+                })
                 
                 SettingsButton(title: "Privacy Policy", action: {
                     showPrivacyPolicy.toggle()
@@ -45,10 +55,12 @@ struct Settings: View {
                     .foregroundColor(.gray)
                     .padding(.top, 16)
             }
-            .padding()
         }
         .sheet(isPresented: $showPrivacyPolicy) {
             PrivacyPolicyView()
+        }
+        .sheet(isPresented: $showTutorial) {  // Show Tutorial view as a sheet
+            TutorialView()
         }
     }
     
@@ -64,20 +76,24 @@ struct Settings: View {
     }
     
     func openGitHub() {
-        if let url = URL(string: "https://github.com") {
-            // UIApplication.shared.open(url)
+        if let url = URL(string: "https://github.com/jacobamobin/AppleIntelligenceWatchOS") {
+            WKExtension.shared().openSystemURL(url)
         }
     }
     
+    // Save assistant Name
     func saveAssistantName(_ name: String) {
         UserDefaults.standard.set(name, forKey: "AssistantName")
     }
     
+    // Save assistant Voice
     func saveSelectedOption(_ option: Int) {
         UserDefaults.standard.set(option, forKey: "SelectedOption")
     }
 }
 
+
+// MARK: THe text field in which you chose the assistant name
 struct AssistantNameInput: View {
     @Binding var assistantName: String
     
@@ -91,6 +107,7 @@ struct AssistantNameInput: View {
     }
 }
 
+// MARK: The assistant voice selector builder (Voice Testing + Name)
 struct AssistantVoiceSelector: View {
     @Binding var selectedOption: Int
     let demoOptions: [String: String]
@@ -122,6 +139,8 @@ struct AssistantVoiceSelector: View {
     }
 }
 
+
+// MARK: Shows the assistant voices, whichever one is selected is in Blue
 struct VoiceButton: View {
     let title: String
     let selected: Bool
@@ -141,6 +160,7 @@ struct VoiceButton: View {
     }
 }
 
+// MARK: The play button for the Audio Showcase
 struct PlayButton: View {
     let action: () -> Void
     
@@ -154,6 +174,7 @@ struct PlayButton: View {
     }
 }
 
+// MARK: A settings button view
 struct SettingsButton: View {
     let title: String
     let action: () -> Void
@@ -171,6 +192,7 @@ struct SettingsButton: View {
     }
 }
 
+// MARK: Displays the privacy policy
 struct PrivacyPolicyView: View {
     var body: some View {
         VStack {
@@ -181,6 +203,32 @@ struct PrivacyPolicyView: View {
                 Text("Assistant for Apple Watch sends all your queries to ChatGPT (Voice) and Perplexity (Text). Therefore this application's privacy is governed by OpenAI's privacy policy and Perplexity's privacy policy. This app does not collect any personal information or data.")
                     .padding()
             }
+        }
+    }
+}
+
+ // MARK: How to use View
+struct TutorialView: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Tutorial")
+                    .font(.title)
+                    .bold()
+                    .padding(.bottom)
+
+                Text("Here's a brief guide on how to use the app:")
+                    .font(.headline)
+
+                Text("1. On the time screen start holding to talk")
+                Text("2. Release your finger to send the message")
+                Text("3. Tap on the response text to go back to the clock screen, or long hold to talk right away")
+                Text("4. Adjust volume with the volume button")
+                Text("5. Go to settings to customize assistant name and voice")
+
+                Spacer()
+            }
+            .padding()
         }
     }
 }

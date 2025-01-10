@@ -7,21 +7,26 @@
 
 import Foundation
 
-// Uses Perplexity API
+// MARK: Uses the perplexity API to get a response to the users question
 func sendRequest(userPrompt: String) -> String {
+    // Load api key from Config.plist
     let apiKey: String = loadAPIKey() ?? "Invalid API Key"
+    // Get assistant name form UserDefaults
     let assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
     
+    // This is the URL for Perplexity
     guard let url = URL(string: "https://api.perplexity.ai/chat/completions") else {
         print("Invalid URL")
         return "Error: Invalid URL"
     }
     
+    // Start building the Request
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization") // Using apiKey instead of perplexityApiKey
     request.addValue("application/json", forHTTPHeaderField: "Content-Type")
     
+    // Payload for the API with paramaters as defined on Perplexitys API documentation
     let payload: [String: Any] = [
         "model": "llama-3.1-sonar-small-128k-online",
         "messages": [
@@ -41,6 +46,7 @@ func sendRequest(userPrompt: String) -> String {
         "frequency_penalty": 1
     ]
     
+    // Send the requests
     do {
         request.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [])
     } catch {
@@ -52,6 +58,7 @@ func sendRequest(userPrompt: String) -> String {
     
     // Capture self weakly to avoid retain cycles
     let semaphore = DispatchSemaphore(value: 0) // To wait for the completion of the async call
+    
     
     URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
@@ -68,6 +75,7 @@ func sendRequest(userPrompt: String) -> String {
             return
         }
         
+        // Debugging and parsing
         do {
             if let responseObject = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
                 if let choices = responseObject["choices"] as? [[String: Any]],
@@ -92,13 +100,16 @@ func sendRequest(userPrompt: String) -> String {
     
     semaphore.wait() // Wait for the API call to finish
     return responseText
+    // TODO: Remove citations from return
+    
+    
 }
 
-// Helper function to load API key from the plist
+// Helper function to load Perplexity API key from the plist
 func loadAPIKey() -> String? {
     if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
        let config = NSDictionary(contentsOfFile: path),
-       let apiKey = config["PerplexityAPIKey"] as? String {
+       let apiKey = config["Perplexity"] as? String {
         return apiKey
     }
     return nil

@@ -8,11 +8,14 @@ import Foundation
 import AVFoundation
 import OpenAI
 
+// MARK: Microphone holds functions that take the users current input and send it to open AI's speech-to-text model
 struct Microphone {
     static var audioRecorder: AVAudioRecorder?
     static var audioFileURL: URL?
+    // For the OpenAI Swift Package
     static let openAI = OpenAI(apiToken: getChatGPTKey() ?? "")
 
+    // Setup the initial audio setup
     static func setupAudioSession() {
         let audioSession = AVAudioSession.sharedInstance()
         do {
@@ -23,13 +26,16 @@ struct Microphone {
         }
     }
 
+    // MARK: Function to start the recording
     static func startRecording() {
         setupAudioSession()
+        // Save the audio file to a temporary directory
         let tempDir = FileManager.default.temporaryDirectory
         let audioFileName = UUID().uuidString + ".m4a"
         let audioFilePath = tempDir.appendingPathComponent(audioFileName)
         audioFileURL = audioFilePath
 
+        // Modify recording settings here
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
             AVSampleRateKey: 44100,
@@ -37,6 +43,7 @@ struct Microphone {
             AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
         ]
 
+        // Try to record the audio
         do {
             audioRecorder = try AVAudioRecorder(url: audioFilePath, settings: settings)
             audioRecorder?.prepareToRecord()
@@ -46,6 +53,7 @@ struct Microphone {
         }
     }
 
+    // MARK: Function to stop the recording
     static func stopRecording(completion: @escaping (String) -> Void) {
         audioRecorder?.stop()
         guard let audioFileURL = audioFileURL else {
@@ -69,7 +77,9 @@ struct Microphone {
         }
     }
 
+    // MARK: This function sends the saved recording to Open AI to transcribe into text
     private static func transcribeAudio(audioFileURL: URL) async throws -> String {
+        // This function uses the Open AI Package by Macpaw, for more documentation go see their repo
         let data = try Data(contentsOf: audioFileURL)
 
         let fileExtension = audioFileURL.pathExtension.lowercased()
@@ -96,6 +106,7 @@ struct Microphone {
     }
 }
 
+// Simple function to get the ChatGPT key from the Config.plist
 public func getChatGPTKey() -> String? {
     if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
        let config = NSDictionary(contentsOfFile: path),

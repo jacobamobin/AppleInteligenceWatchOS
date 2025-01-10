@@ -29,6 +29,7 @@ struct GlowEffect: View {
                 startTimers()
             }
         }
+        // Check if the view should be frozen
         .onChange(of: freeze) { isFrozen in
             if isFrozen {
                 stopTimers()
@@ -41,6 +42,7 @@ struct GlowEffect: View {
         }
     }
 
+    // MARK: Function to start the timers for the gradients
     private func startTimers() {
         stopTimers() // Ensure no existing timers are running
         timers.append(
@@ -52,17 +54,20 @@ struct GlowEffect: View {
         )
     }
 
+    // MARK: Function to stop the timers for the gradients
     private func stopTimers() {
         timers.forEach { $0.invalidate() }
         timers.removeAll()
     }
 
     // Function to generate random gradient stops on an Angular Gradient
+    // MARK: Function to generate the colours of the Glow Effect
+    // Change the hex codes to change the colours
     static func generateGradientStops() -> [Gradient.Stop] {
         [
             Gradient.Stop(color: Color(hex: "BC82F3"), location: Double.random(in: 0...1)),
             Gradient.Stop(color: Color(hex: "F5B9EA"), location: Double.random(in: 0...1)),
-            Gradient.Stop(color: Color(hex: "8D9FFF"), location: Double.random(in: 0...1)),
+            //Gradient.Stop(color: Color(hex: "8D9FFF"), location: Double.random(in: 0...1)),
             Gradient.Stop(color: Color(hex: "FF6778"), location: Double.random(in: 0...1)),
             Gradient.Stop(color: Color(hex: "FFBA71"), location: Double.random(in: 0...1)),
             Gradient.Stop(color: Color(hex: "C686FF"), location: Double.random(in: 0...1))

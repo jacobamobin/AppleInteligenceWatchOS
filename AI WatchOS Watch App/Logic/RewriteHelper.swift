@@ -7,6 +7,8 @@
 
 import Foundation
 
+// MARK: This re-writes the output text from Result into a more friendly speakable output for TTS
+// For example "3°" would be converted to "3 degrees"
 public func sendRewriteRequest(prompt: String) -> String {
     // Function to process the prompt for TTS-friendly output
 
