@@ -9,23 +9,24 @@ import SwiftUI
 import AVFoundation
 import Foundation
 import OpenAI
+import WatchKit
 
 // MARK: The main handler for all the views
 struct ContentView: View {
     // assistantName || What the LLM refers to itself as
     // selectedVoice || The voice OpenAI's Whisper API uses, default is .alloy
-    // state || Boolean that decides bettween home screen (false) and response screen (True)
+    // state || Boolean that decides between home screen (false) and response screen (True)
     // recognizedText || Holds the text that OpenAI Transcribes from the microphone
     // tts || An instance of the TTS Handler
     // displayText || The response from Perplexity
-    // rewriteTect || A Modified response from Perplexity that works best with TTS Models
+    // rewriteText || A Modified response from Perplexity that works best with TTS Models
     // isPressed || A boolean to tell if the user is tapping the screen
     @State private var assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
     @State private var selectedVoice: String = UserDefaults.standard.string(forKey: "SelectedVoice") ?? ".alloy"
-    @State private var state = false
+    @State private var state = true
     @State private var recognizedText = ""
     @State private var tts = TTS()
-    @State private var displayText = ""
+    @State private var displayText = "This is a test of the writing and reading capabilities of OpenAI's Whisper APIaldkjlkajsdlkjas;d'kj;lksdjf;lkajfl;kj;fldkaj;lskjdf;lkjsdaf;lkj;lsadkjf;lksajdf;lkjas;ldkjfl;kjsadf;lkjal;sdkjf;lkjsad;lfkj;lksajdf;lkjsadfl;kjas;lkdjfl;ksajdlrf;kjsad;lkjfl;kjasdfl;kjsal;dfkj;lskadjf;lkjsadfl;kjsal;dkfj;lkasjdfl;kjaf;lkj"
     @State private var rewriteText = ""
     @State private var isPressed = false
 
@@ -44,7 +45,6 @@ struct ContentView: View {
                                     .transition(.move(edge: .top).combined(with: .opacity))
                                 GlowEffect(freeze: true)
                             }
-                            
                         }
                     }
                     .foregroundStyle(Color.clear)
@@ -68,22 +68,33 @@ struct ContentView: View {
                 .transition(.opacity)
             } else { // If Response Screen state
                 VStack {
-                    TopBar()
-                    Button {
-                        // Transition to clock screen when the ScrollView is tapped
-                        withAnimation {
-                            state = false
+                    NavigationView {
+                        VStack {
+                            TopBar()
+                            Button {
+                                withAnimation {
+                                    state = false
+                                }
+                            } label: {
+                                ScrollView {
+                                    Text(displayText + "\n \n \n")
+                                        .multilineTextAlignment(.leading)
+                                        .foregroundStyle(Color.white)
+                                }.frame(
+                                    width: WKInterfaceDevice.current().screenBounds.width,
+                                    height: WKInterfaceDevice.current().screenBounds.height-50
+                                )
+                            }.foregroundStyle(Color.clear)
                         }
-                    } label: {
-                        ScrollView {
-                            Text(displayText)
-                                .multilineTextAlignment(.leading)
-                                .foregroundStyle(Color.white)
-                        }
-                    }
-                    .foregroundStyle(Color.clear)
-                    .padding()
+                    }.frame(
+                        width: WKInterfaceDevice.current().screenBounds.width,
+                        height: WKInterfaceDevice.current().screenBounds.width
+                    )
+                    
                 }
+                
+                
+                
             }
         }
         .animation(.easeInOut(duration: 0.2), value: state)

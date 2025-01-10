@@ -16,75 +16,74 @@ struct TopBar: View {
     @FocusState private var isVolumeFocused: Bool // For Digital Crown focus
 
     var body: some View {
-        NavigationView {
-            VStack {
-                // Top Navigation Bar
-                HStack {
-                    // Left side with Volume, Settings, and Tutorial buttons
-                    HStack(spacing: -5) { // Added spacing between buttons
-                        // Volume Button
-                        Button(action: {
-                            showVolumeControl.toggle()
-                        }) {
-                            Image(systemName: "speaker.wave.2.fill")
-                                .font(.title3) // Smaller icon
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(
-                                    Circle()
-                                        .fill(Color.gray.opacity(0.2)) // Circular background with slight opacity
-                                )
-                        }
-                        .frame(width: 50, height: 50)
-                        .foregroundStyle(.clear)
-                        .sheet(isPresented: $showVolumeControl) {
-                            VolumeControlView(volume: $volume)
-                        }
-
-                        // Settings Button
-                        NavigationLink(destination: Settings()) {
-                            Image(systemName: "gearshape.fill")
-                                .font(.title3) // Smaller icon
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(
-                                    Circle()
-                                        .fill(Color.gray.opacity(0.2)) // Circular background with slight opacity
-                                )
-                        }
-                        .frame(width: 50, height: 50)
-                        .foregroundStyle(.clear)
-
-                        // Tutorial Button
-                        Button(action: {
-                            showTutorial.toggle()
-                        }) {
-                            Image(systemName: "questionmark.circle.fill")
-                                .font(.title3) // Smaller icon
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(
-                                    Circle()
-                                        .fill(Color.gray.opacity(0.2)) // Circular background with slight opacity
-                                )
-                        }
-                        .frame(width: 50, height: 50)
-                        .foregroundStyle(.clear)
-                        .sheet(isPresented: $showTutorial) {
-                            TutorialView()
-                        }
+        VStack {
+            // Top Navigation Bar
+            HStack {
+                // Left side with Volume, Settings, and Tutorial buttons
+                HStack(spacing: -5) { // Added spacing between buttons
+                    // Volume Button
+                    Button(action: {
+                        showVolumeControl.toggle()
+                    }) {
+                        Image(systemName: "speaker.wave.2.fill")
+                            .font(.title3) // Smaller icon
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(
+                                Circle()
+                                    .fill(Color.gray.opacity(0.2)) // Circular background with slight opacity
+                            )
+                    }
+                    .frame(width: 50, height: 50)
+                    .foregroundStyle(.clear)
+                    .sheet(isPresented: $showVolumeControl) {
+                        VolumeControlView(volume: $volume)
                     }
 
-                    Spacer()
+                    // Settings Button
+                    NavigationLink(destination: Settings()) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.title3) // Smaller icon
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(
+                                Circle()
+                                    .fill(Color.gray.opacity(0.2)) // Circular background with slight opacity
+                            )
+                    }
+                    .frame(width: 50, height: 50)
+                    .foregroundStyle(.clear)
 
-                    // Assistant Name (aligned to the far right)
-                    Text(assistantName)
-                        .font(.subheadline)
-                        .foregroundColor(.white)
-                        .padding(.top, 20) // Added padding to the right edge
+                
+                    // Tutorial Button
+                    Button(action: {
+                        showTutorial.toggle()
+                    }) {
+                        Image(systemName: "questionmark.circle.fill")
+                            .font(.title3) // Smaller icon
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(
+                                Circle()
+                                    .fill(Color.gray.opacity(0.2)) // Circular background with slight opacity
+                            )
+                    }
+                    .frame(width: 50, height: 50)
+                    .foregroundStyle(.clear)
+                    .sheet(isPresented: $showTutorial) {
+                        TutorialView()
+                    }
                 }
-                .padding(.top, 10) // Optional: Add padding to the top of the HStack for better spacing
+
+                Spacer()
+
+                // Assistant Name (aligned to the far right)
+                Text(assistantName)
+                    .font(.subheadline)
+                    .foregroundColor(.white)
+                    .padding(.top, 20) // Added padding to the right edge
             }
+            .padding(.top, 10)
         }
     }
 }
