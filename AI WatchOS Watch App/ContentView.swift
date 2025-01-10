@@ -58,11 +58,13 @@ struct ContentView: View {
                     .foregroundStyle(Color.clear)
                     .onLongPressGesture(minimumDuration: 0.1, pressing: { isPressing in
                         if isPressing {
+                            WKInterfaceDevice.current().play(.success)
                             Microphone.startRecording()
                             isPressed = true
                         } else {
                             withAnimation {
                                 // Transition to thinking state when the button is released
+                                WKInterfaceDevice.current().play(.success)
                                 isThinking = true // Show thinking animation
                                 isPressed = false // Hide assistant animation
                             }
@@ -71,8 +73,11 @@ struct ContentView: View {
                                 recognizedText = text // Capture transcribed text
                             
                                 displayText = RemoveCitations(prompt: sendRequest(userPrompt: recognizedText)) // Fetch result
+                                WKInterfaceDevice.current().play(.success)
+                                
                                 withAnimation {
                                     state = true // Transition to Result view
+                                    WKInterfaceDevice.current().play(.success)
                                 }
                                 isThinking = false // Hide thinking animation after processing
                                 
@@ -110,6 +115,7 @@ struct ContentView: View {
                             .onLongPressGesture {
                                 withAnimation {
                                     // Set reactivateMic flag to true to trigger mic reactivation
+                                    WKInterfaceDevice.current().play(.success)
                                     reactivateMic = true
                                     state = false // Transition to Home screen
                                 }
@@ -132,6 +138,7 @@ struct ContentView: View {
             // Reactivate the microphone if necessary after long press
             if newValue {
                 Microphone.startRecording()
+                WKInterfaceDevice.current().play(.click)
                 reactivateMic = false // Reset the flag after activation
             }
         }
