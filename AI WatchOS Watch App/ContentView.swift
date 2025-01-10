@@ -123,7 +123,7 @@ struct ContentView: View {
                 }
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: state)
+        .animation(.smooth(duration: 0.2), value: state)
         .onAppear {
             // Ensure selected voice is updated when the view appears
             selectedVoice = UserDefaults.standard.string(forKey: "SelectedVoice") ?? ".alloy"

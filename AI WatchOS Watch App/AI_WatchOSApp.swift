@@ -9,9 +9,18 @@ import SwiftUI
 
 @main
 struct AI_WatchOS_Watch_AppApp: App {
+    @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore: Bool = false
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if hasLaunchedBefore {
+                ContentView()
+            } else {
+                FirstOpen()
+                    .onAppear {
+                        hasLaunchedBefore = true
+                    }
+            }
         }
     }
 }
