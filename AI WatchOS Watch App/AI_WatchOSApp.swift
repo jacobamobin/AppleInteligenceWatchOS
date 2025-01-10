@@ -4,28 +4,22 @@
 //
 //  Created by Jacob Mobin on 2025-01-05.
 //
-
 import SwiftUI
 
 @main
 struct AI_WatchOS_Watch_AppApp: App {
     @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore: Bool = false
-    @AppStorage("gradientOffset") private var gradientOffset: CGFloat = 0.0
-    @AppStorage("gradientCornerRadius") private var gradientCornerRadius: CGFloat = 0.0
-
+    @State private var showTutorial: Bool = true
+    
     var body: some Scene {
         WindowGroup {
-            if hasLaunchedBefore && gradientOffset != 0.0 && gradientCornerRadius != 0.0 {
+            if hasLaunchedBefore {
                 ContentView()
             } else {
-                if hasLaunchedBefore {
-                    Setup()
-                } else {
-                    FirstOpen()
-                        .onAppear {
-                            hasLaunchedBefore = true
-                        }
-                }
+                FirstOpen(showTutorial: $showTutorial)
+                    .onAppear {
+                        hasLaunchedBefore = true
+                    }
             }
         }
     }

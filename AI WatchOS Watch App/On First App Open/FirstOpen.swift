@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct FirstOpen: View {
+    @Binding var showTutorial: Bool
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
@@ -16,17 +18,26 @@ struct FirstOpen: View {
                     .bold()
                     .padding(.bottom)
 
-                Text("1. On the time screen, start holding to talk.\n")
-                Text("2. Release your finger to send the message.\n")
-                Text("3. Tap on the response text to go back to the clock screen, or long hold to talk right away.\n")
-                Text("4. Add the complication to your stock watchscreen.\n")
-                Text("5. Allow this app to stay open by default.\n")
+                Text("1. On the time screen, start holding to talk.")
+                Text("2. Release your finger to send the message.")
+                Text("3. Tap on the response text to go back to the clock screen, or long hold to talk right away.")
+                Text("4. Add the complication to your stock watchscreen.")
+                Text("5. Allow this app to stay open by default.")
+            }
+            .padding()
+
+            Button("Close Tutorial") {
+                showTutorial = false
             }
             .padding()
         }
     }
 }
 
-#Preview {
-    FirstOpen()
+// Preview
+struct FirstOpen_Previews: PreviewProvider {
+    static var previews: some View {
+        FirstOpen(showTutorial: .constant(true))
+    }
 }
+

@@ -83,7 +83,7 @@ struct Effect: View {
     var blur: Double
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 50)
+        RoundedRectangle(cornerRadius: min(WKInterfaceDevice.current().screenBounds.width, WKInterfaceDevice.current().screenBounds.height) * 0.25)
             .strokeBorder(
                 AngularGradient(
                     gradient: Gradient(stops: gradientStops),
@@ -106,7 +106,7 @@ struct EffectNoBlur: View {
     var width: Double
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 50)
+        RoundedRectangle(cornerRadius: min(WKInterfaceDevice.current().screenBounds.width, WKInterfaceDevice.current().screenBounds.height) * 0.16)
             .strokeBorder(
                 AngularGradient(
                     gradient: Gradient(stops: gradientStops),
