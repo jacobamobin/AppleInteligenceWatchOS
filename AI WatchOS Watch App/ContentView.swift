@@ -12,6 +12,7 @@ import OpenAI
 import WatchKit
 
 // MARK: The main handler for all the views
+// TODO: Fix reactivate Mic
 struct ContentView: View {
     // assistantName || What the LLM refers to itself as
     // selectedVoice || The voice OpenAI's Whisper API uses, default is .alloy
@@ -21,14 +22,16 @@ struct ContentView: View {
     // displayText || The response from Perplexity
     // rewriteText || A Modified response from Perplexity that works best with TTS Models
     // isPressed || A boolean to tell if the user is tapping the screen
+    // reactivateMic || Boolean that controls jumping from response
     @State private var assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
     @State private var selectedVoice: String = UserDefaults.standard.string(forKey: "SelectedVoice") ?? ".alloy"
-    @State private var state = true
+    @State private var state = false
     @State private var recognizedText = ""
     @State private var tts = TTS()
-    @State private var displayText = "This is a test of the writing and reading capabilities of OpenAI's Whisper APIaldkjlkajsdlkjas;d'kj;lksdjf;lkajfl;kj;fldkaj;lskjdf;lkjsdaf;lkj;lsadkjf;lksajdf;lkjas;ldkjfl;kjsadf;lkjal;sdkjf;lkjsad;lfkj;lksajdf;lkjsadfl;kjas;lkdjfl;ksajdlrf;kjsad;lkjfl;kjasdfl;kjsal;dfkj;lskadjf;lkjsadfl;kjsal;dkfj;lkasjdfl;kjaf;lkj"
+    @State private var displayText = ""
     @State private var rewriteText = ""
     @State private var isPressed = false
+    @State private var reactivateMic = false 
 
     var body: some View {
         ZStack {
@@ -80,6 +83,7 @@ struct ContentView: View {
                                     state = false
                                 }
                             } label: {
+                                // ScrollView with long press gesture
                                 ScrollView {
                                     Text(displayText + "\n \n \n")
                                         .multilineTextAlignment(.leading)
@@ -89,22 +93,35 @@ struct ContentView: View {
                                     width: WKInterfaceDevice.current().screenBounds.width,
                                     height: WKInterfaceDevice.current().screenBounds.height-25
                                 )
-                            }.foregroundStyle(Color.clear)
+                            }
+                            .foregroundStyle(Color.clear)
+                            .onLongPressGesture {
+                                withAnimation {
+                                    // Set reactivateMic flag to true to trigger mic reactivation
+                                    reactivateMic = true
+                                    state = false // Transition to Home screen
+                                }
+                            }
                         }
-                    }.frame(
+                    }
+                    .frame(
                         width: WKInterfaceDevice.current().screenBounds.width,
                         height: WKInterfaceDevice.current().screenBounds.width
                     )
-                    
                 }
-
-                
             }
         }
         .animation(.easeInOut(duration: 0.2), value: state)
         .onAppear {
             // Ensure selected voice is updated when the view appears
             selectedVoice = UserDefaults.standard.string(forKey: "SelectedVoice") ?? ".alloy"
+        }
+        .onChange(of: reactivateMic) { newValue in
+            // Reactivate the microphone if necessary after long press
+            if newValue {
+                Microphone.startRecording()
+                reactivateMic = false // Reset the flag after activation
+            }
         }
         .onChange(of: displayText) { newText in
             // Trigger TTS to play audio when `displayText` is updated
