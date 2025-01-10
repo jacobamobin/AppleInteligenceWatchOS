@@ -17,7 +17,7 @@ struct Clock: View {
                 .foregroundColor(.white)
 
             Text(currentTime.minute)
-                .font(.system(size: 90, weight: .medium, design: .rounded))
+                .font(.system(size: 90, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
         }.padding(.bottom, 20)
         .onAppear {
