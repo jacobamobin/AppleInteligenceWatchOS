@@ -31,7 +31,8 @@ struct ContentView: View {
     @State private var displayText = ""
     @State private var rewriteText = ""
     @State private var isPressed = false
-    @State private var reactivateMic = false 
+    @State private var reactivateMic = false
+    @State private var isThinking = false // New state to track "thinking" animation
 
     var body: some View {
         ZStack {
@@ -41,7 +42,11 @@ struct ContentView: View {
                         ZStack {
                             if isPressed {
                                 AssistantIcon()
-                                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                                    .transition(.move(edge: .bottom).combined(with: .opacity)) // Assistant icon moves out
+                                GlowEffect(freeze: false)
+                            } else if isThinking {
+                                ThinkingIcon()
+                                    .transition(.move(edge: .bottom).combined(with: .opacity)) // Thinking icon moves in
                                 GlowEffect(freeze: false)
                             } else {
                                 Clock()
@@ -56,14 +61,21 @@ struct ContentView: View {
                             Microphone.startRecording()
                             isPressed = true
                         } else {
+                            withAnimation {
+                                // Transition to thinking state when the button is released
+                                isThinking = true // Show thinking animation
+                                isPressed = false // Hide assistant animation
+                            }
+                            
                             Microphone.stopRecording { text in
                                 recognizedText = text // Capture transcribed text
-                                withAnimation { // Smooth transition to Result view
+                            
+                                displayText = RemoveCitations(prompt: sendRequest(userPrompt: recognizedText)) // Fetch result
+                                withAnimation {
                                     state = true // Transition to Result view
-                                    isPressed = false
                                 }
-                                // Fetch displayText after recording stops
-                                displayText = RemoveCitations(prompt: sendRequest(userPrompt: recognizedText))
+                                isThinking = false // Hide thinking animation after processing
+                                
                             }
                         }
                     }, perform: {})
@@ -132,6 +144,9 @@ struct ContentView: View {
         }
     }
 }
+
+
+
 
 #Preview {
     ContentView()
