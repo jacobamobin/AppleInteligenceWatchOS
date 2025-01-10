@@ -10,16 +10,22 @@ import SwiftUI
 @main
 struct AI_WatchOS_Watch_AppApp: App {
     @AppStorage("hasLaunchedBefore") private var hasLaunchedBefore: Bool = false
-    
+    @AppStorage("gradientOffset") private var gradientOffset: CGFloat = 0.0
+    @AppStorage("gradientCornerRadius") private var gradientCornerRadius: CGFloat = 0.0
+
     var body: some Scene {
         WindowGroup {
-            if hasLaunchedBefore {
+            if hasLaunchedBefore && gradientOffset != 0.0 && gradientCornerRadius != 0.0 {
                 ContentView()
             } else {
-                FirstOpen()
-                    .onAppear {
-                        hasLaunchedBefore = true
-                    }
+                if hasLaunchedBefore {
+                    Setup()
+                } else {
+                    FirstOpen()
+                        .onAppear {
+                            hasLaunchedBefore = true
+                        }
+                }
             }
         }
     }
