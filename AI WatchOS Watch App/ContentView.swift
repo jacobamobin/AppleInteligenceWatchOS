@@ -32,15 +32,17 @@ struct ContentView: View {
                             if isPressed {
                                 AssistantIcon()
                                     .transition(.move(edge: .bottom).combined(with: .opacity)) // Animation for assistant icon
+                                GlowEffect(freeze: false)
                             } else {
                                 Clock()
                                     .transition(.move(edge: .top).combined(with: .opacity)) // Animation for clock
+                                GlowEffect(freeze: true)
                             }
-                            GlowEffect()
+                            
                         }
                     }
                     .foregroundStyle(Color.clear)
-                    .onLongPressGesture(minimumDuration: 0.2, pressing: { isPressing in
+                    .onLongPressGesture(minimumDuration: 0.1, pressing: { isPressing in
                         if isPressing {
                             Microphone.startRecording() // Assuming Microphone is set
                             isPressed = true

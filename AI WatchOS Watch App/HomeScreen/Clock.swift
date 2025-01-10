@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// MARK: Simple view for the HOUR/MINUITE clock on the homescreen
 struct Clock: View {
     @State private var currentTime = CurrentTime()
 
@@ -25,6 +26,7 @@ struct Clock: View {
         }
     }
 
+    //Starts the clock on view load
     private func startClock() {
         Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             currentTime = CurrentTime()
@@ -32,6 +34,7 @@ struct Clock: View {
     }
 }
 
+// Gets the current time
 struct CurrentTime {
     let hour: String
     let minute: String

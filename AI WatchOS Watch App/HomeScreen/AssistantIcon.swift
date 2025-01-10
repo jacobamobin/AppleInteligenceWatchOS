@@ -7,12 +7,15 @@
 
 import SwiftUI
 
+// MARK: A Placeholder when you are holding the screen and talking to the AI
 struct AssistantIcon: View {
+    //Get the assistant name from UserDefaults
     @State private var assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
 
     var body: some View {
         VStack(spacing: 10) {
             ZStack {
+                // Microphone Circle
                 Circle()
                     .fill(LinearGradient(gradient: Gradient(colors: [Color.blue, Color.purple]), startPoint: .topLeading, endPoint: .bottomTrailing))
                     .frame(width: 80, height: 80)
@@ -22,6 +25,7 @@ struct AssistantIcon: View {
                     .foregroundColor(.white)
             }
 
+            //Text below
             VStack(spacing: 4) {
                 Text(assistantName)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
