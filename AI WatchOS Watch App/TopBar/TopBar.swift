@@ -14,6 +14,7 @@ struct TopBar: View {
     @State private var volume: Double = 50.0 // Default volume
     @State private var showTutorial = false // State for tutorial view
     @FocusState private var isVolumeFocused: Bool // For Digital Crown focus
+    @State private var isSmallWatch: Bool = false
 
     var body: some View {
         VStack {
@@ -77,13 +78,19 @@ struct TopBar: View {
 
                 Spacer()
 
-                // Assistant Name (aligned to the far right)
-                Text(assistantName)
-                    .font(.subheadline)
-                    .foregroundColor(.white)
-                    .padding(.top, 20) // Added padding to the right edge
+                // Assistant Name (conditionally displayed based on screen size)
+                if !isSmallWatch {
+                    Text(assistantName)
+                        .font(.subheadline)
+                        .foregroundColor(.white)
+                        .padding(.top, 20) // Added padding to the right edge
+                }
             }
             .padding(.top, 10)
+            .onAppear {
+                // Determine if the watch is small (you can adjust the width threshold)
+                isSmallWatch = WKInterfaceDevice.current().screenBounds.width < 200
+            }
         }
     }
 }
@@ -118,8 +125,6 @@ struct VolumeControlView: View {
         .padding()
     }
 }
-
-
 
 #Preview {
     TopBar()

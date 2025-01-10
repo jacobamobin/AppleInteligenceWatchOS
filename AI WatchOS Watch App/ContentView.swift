@@ -71,6 +71,10 @@ struct ContentView: View {
                     NavigationView {
                         VStack {
                             TopBar()
+                                .padding(.bottom, 95)
+                                .padding(.trailing, 10)
+                                .padding(.top, 10)
+                                .frame(height: 50)
                             Button {
                                 withAnimation {
                                     state = false
@@ -80,9 +84,10 @@ struct ContentView: View {
                                     Text(displayText + "\n \n \n")
                                         .multilineTextAlignment(.leading)
                                         .foregroundStyle(Color.white)
+                                        .padding(.top, 15)
                                 }.frame(
                                     width: WKInterfaceDevice.current().screenBounds.width,
-                                    height: WKInterfaceDevice.current().screenBounds.height-50
+                                    height: WKInterfaceDevice.current().screenBounds.height-25
                                 )
                             }.foregroundStyle(Color.clear)
                         }
@@ -92,8 +97,7 @@ struct ContentView: View {
                     )
                     
                 }
-                
-                
+
                 
             }
         }
