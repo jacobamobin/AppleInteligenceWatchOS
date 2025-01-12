@@ -2,7 +2,7 @@
 
 > [!Warning]  
 > You can find the app store version of this app Here.
-> If youde like to build it yourself (with your own api keys go to Setup
+> If youde like to build it yourself (with your own api keys) go to Setup.
 
 ![Github1](ReadMe/Github1.png)
 ![Github2](ReadMe/Github2.png)
