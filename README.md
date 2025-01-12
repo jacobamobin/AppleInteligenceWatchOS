@@ -1,4 +1,5 @@
 ![Banner](ReadMe/Header2.png)
+Making your apple watch even more powerful!
 
 > [!Warning]  
 > This Repo and Project is still under construction.
@@ -10,6 +11,9 @@
 > [!Tip]
 > If your looking for just the [Glow Animations](https://github.com/jacobamobin/AppleIntelligenceGlowEffect) you can find them here
 
+# Privacy Policy
+Check out the [Privacy Policy](PRIVACY.md)
+
 # Setup
 > [!Warning]
 > I highly suggest using the AppStore version, otherwise to follow the following steps you will need a [Perplexity](https://docs.perplexity.ai/home) and [OpenAI](https://platform.openai.com/docs) Api key.
@@ -19,6 +23,14 @@
 4) Add your api keys in the string section of both keys
 ![Api Keys](ReadMe/ApiKeys.png)
 5) Build the project to your apple watch
+
+# Future Features 
+Feel free to commit.
+- Optimization
+- Remove stock clock for Github Users
+- Fix some spacing issues
+- Make gradient glow more reactive
+- Add support for other models (Github Only)
 
 # Contributing
 Manager: [@jacobamobin](https://github.com/jacobamobin)
