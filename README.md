@@ -1,8 +1,8 @@
 ![Banner](ReadMe/Header2.png)
 Making your apple watch even more powerful!
 
-> [!Warning]  
-> This Repo and Project is still under construction.
+Go watch the [Youtube Video](https://www.google.com/search?q=coming+soon)
+Go download on the [AppStore](https://www.google.com/search?q=coming+soon)
 
 ![Github1](ReadMe/Github1.png)
 ![Github2](ReadMe/Github2.png)
@@ -10,6 +10,13 @@ Making your apple watch even more powerful!
 - Powered by Perplexity (Data and Responses) and ChatGPT (Whisper and TTS)
 > [!Tip]
 > If your looking for just the [Glow Animations](https://github.com/jacobamobin/AppleIntelligenceGlowEffect) you can find them here
+
+# Features/Guide
+- Hold on the clock screen and start speaking
+- Once your done speaking let go of the screen
+- Your prompt will get sent to Perplexity
+- After a few secconds you will see the response
+- A TTS model will begin speaking the response 
 
 # Privacy Policy
 Check out the [Privacy Policy](PRIVACY.md)
@@ -32,7 +39,9 @@ Feel free to commit.
 - Make gradient glow more reactive
 - Add support for other models (Github Only)
 
-# Contributing
+# Contributing/Support
 Manager: [@jacobamobin](https://github.com/jacobamobin)
+This was built using [OpenAI Swift](https://github.com/MacPaw/OpenAI/issues) by [Macpaw Inc](https://github.com/MacPaw)
+
 > [!Important]
 > Familiarize yourself with the [license](LICENSE.md) before committing
