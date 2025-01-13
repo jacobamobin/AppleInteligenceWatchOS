@@ -34,6 +34,12 @@ Check out the [Privacy Policy](PRIVACY.md)
 
 # Future Features 
 Feel free to commit.
+- IMessage Support
+- Mail Support
+- Notes Support
+- Alarm Support
+- Reminders Support
+- Navigation Support (Google Maps)
 - Optimization
 - Remove stock clock for Github Users
 - Fix some spacing issues
