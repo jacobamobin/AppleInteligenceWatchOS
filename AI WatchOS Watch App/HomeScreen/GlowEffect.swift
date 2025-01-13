@@ -13,16 +13,20 @@ import WatchKit
 struct GlowEffect: View {
     @State private var gradientStops: [Gradient.Stop] = GlowEffect.generateGradientStops()
     @State private var timers: [Timer] = []
+
     var freeze: Bool
+    
+    let cornerRoundness: Int = DeviceConfig.cornerRoundness
+    let screenOffset: Int = DeviceConfig.screenOffset
 
     var body: some View {
         ZStack {
             // First layer is the border around the edge
             // The next 3 layers are the blurry layers closer to the middle of the screen
-            EffectNoBlur(gradientStops: gradientStops, width: 5)
-            Effect(gradientStops: gradientStops, width: 7, blur: 4)
-            Effect(gradientStops: gradientStops, width: 9, blur: 12)
-            Effect(gradientStops: gradientStops, width: 12, blur: 15)
+            EffectNoBlur(gradientStops: gradientStops, width: 5, cornerRoundness: DeviceConfig.cornerRoundness, screenOffset: DeviceConfig.screenOffset)
+            Effect(gradientStops: gradientStops, width: 7, blur: 4, cornerRoundness: DeviceConfig.cornerRoundness, screenOffset: DeviceConfig.screenOffset)
+            Effect(gradientStops: gradientStops, width: 9, blur: 12, cornerRoundness: DeviceConfig.cornerRoundness, screenOffset: DeviceConfig.screenOffset)
+            Effect(gradientStops: gradientStops, width: 12, blur: 15, cornerRoundness: DeviceConfig.cornerRoundness, screenOffset: DeviceConfig.screenOffset)
         }
         .onAppear { // On appread
             if !freeze {
@@ -73,6 +77,9 @@ struct GlowEffect: View {
             Gradient.Stop(color: Color(hex: "C686FF"), location: Double.random(in: 0...1))
         ].sorted { $0.location < $1.location }
     }
+    
+    // MARK: Calculate paramaters for the glow effect based on screen size of the watch
+    
 }
 
 // MARK: These Effect Functions generate the different layers that make up the gradient effect
@@ -81,9 +88,11 @@ struct Effect: View {
     var gradientStops: [Gradient.Stop]
     var width: Double
     var blur: Double
+    var cornerRoundness: Int
+    var screenOffset: Int
 
     var body: some View {
-        RoundedRectangle(cornerRadius: min(WKInterfaceDevice.current().screenBounds.width, WKInterfaceDevice.current().screenBounds.height) * 0.25)
+        RoundedRectangle(cornerRadius: CGFloat(cornerRoundness))
             .strokeBorder(
                 AngularGradient(
                     gradient: Gradient(stops: gradientStops),
@@ -95,7 +104,7 @@ struct Effect: View {
                 width: WKInterfaceDevice.current().screenBounds.width,
                 height: WKInterfaceDevice.current().screenBounds.height
             )
-            .padding(.top, -17)
+            .padding(.top, -1 * CGFloat(screenOffset))
             .blur(radius: blur)
     }
 }
@@ -104,9 +113,11 @@ struct Effect: View {
 struct EffectNoBlur: View {
     var gradientStops: [Gradient.Stop]
     var width: Double
+    var cornerRoundness: Int
+    var screenOffset: Int
 
     var body: some View {
-        RoundedRectangle(cornerRadius: min(WKInterfaceDevice.current().screenBounds.width, WKInterfaceDevice.current().screenBounds.height) * 0.16)
+        RoundedRectangle(cornerRadius: CGFloat(cornerRoundness))
             .strokeBorder(
                 AngularGradient(
                     gradient: Gradient(stops: gradientStops),
@@ -118,7 +129,7 @@ struct EffectNoBlur: View {
                 width: WKInterfaceDevice.current().screenBounds.width,
                 height: WKInterfaceDevice.current().screenBounds.height
             )
-            .padding(.top, -17)
+            .padding(.top, -1 * CGFloat(screenOffset))
     }
 }
 
@@ -137,6 +148,47 @@ extension Color {
 
         self.init(red: r, green: g, blue: b)
     }
+}
+
+// MARK: Screen Dimension and Offset Constants
+struct DeviceConfig {
+    static let width = WKInterfaceDevice.current().screenBounds.width
+    static let height = WKInterfaceDevice.current().screenBounds.height
+
+    // Calculate corner roundness and screen offset
+    static let cornerRoundness: Int = {
+        switch (width, height) {
+        case (416, 496): // Apple Watch Series 10 (46mm)
+            return 50
+        case (374, 446): // Apple Watch Series 10 (42mm)
+            return 18
+        case (368, 448): // Apple Watch SE (2nd gen) (44mm), Series 6, 7, 8, 9 (44mm)
+            return 17
+        case (352, 430): // Apple Watch Series 7, 8, 9 (41mm)
+            return 16
+        case (324, 394): // Apple Watch SE (2nd gen) (40mm), Series 6 (40mm)
+            return 14
+        default: // Fallback for unknown screen sizes
+            return 10
+        }
+    }()
+
+    static let screenOffset: Int = {
+        switch (width, height) {
+        case (416, 496): // Apple Watch Series 10 (46mm)
+            return 17
+        case (374, 446): // Apple Watch Series 10 (42mm)
+            return 17
+        case (368, 448): // Apple Watch SE (2nd gen) (44mm), Series 6, 7, 8, 9 (44mm)
+            return 6
+        case (352, 430): // Apple Watch Series 7, 8, 9 (41mm)
+            return 6
+        case (324, 394): // Apple Watch SE (2nd gen) (40mm), Series 6 (40mm)
+            return 5
+        default: // Fallback for unknown screen sizes
+            return 5
+        }
+    }()
 }
 
 // Preview
