@@ -72,7 +72,7 @@ struct ContentView: View {
                             Microphone.stopRecording { text in
                                 recognizedText = text // Capture transcribed text
                             
-                                displayText = RemoveCitations(prompt: sendRequest(userPrompt: recognizedText)) // Fetch result
+                                displayText = sendRequest(userPrompt: recognizedText) // Fetch result
                                 WKInterfaceDevice.current().play(.success)
                                 
                                 withAnimation {

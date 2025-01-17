@@ -99,7 +99,7 @@ func sendRequest(userPrompt: String) -> String {
     }.resume()
     
     semaphore.wait() // Wait for the API call to finish
-    return responseText
+    return RemoveCitations(prompt: responseText)
     // TODO: Remove citations from return
     
     
