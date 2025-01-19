@@ -154,36 +154,50 @@ extension Color {
 struct DeviceConfig {
     static let width = WKInterfaceDevice.current().screenBounds.width
     static let height = WKInterfaceDevice.current().screenBounds.height
+    
+    init() {
+         print("Device Width: \(DeviceConfig.width), Height: \(DeviceConfig.height)")
+    }
 
     // Calculate corner roundness and screen offset
     static let cornerRoundness: Int = {
-        switch (width, height) {
-        case (416, 496): // Apple Watch Series 10 (46mm)
+        print("Device Width: \(Int(width)), Height: \(Int(height))")
+        switch (Int(width), Int(height)) {
+        case (208, 248): // Apple Watch Series 10 (46mm)
             return 50
-        case (374, 446): // Apple Watch Series 10 (42mm)
-            return 18
-        case (368, 448): // Apple Watch SE (2nd gen) (44mm), Series 6, 7, 8, 9 (44mm)
-            return 17
-        case (352, 430): // Apple Watch Series 7, 8, 9 (41mm)
+        case (187, 223): // Apple Watch Series 10 (42mm)
+            return 45
+        case (162, 197): // Apple Watch SE (2nd gen) (44mm), Series 6, 7, 8, 9 (44mm)
+            return 28
+        case (184, 224): // Apple Watch Series 6
+            return 34
+        case (352, 430): // Apple Watch Series 7, 8, 9 (41mm) UNUSED
             return 16
-        case (324, 394): // Apple Watch SE (2nd gen) (40mm), Series 6 (40mm)
+        case (205, 251): //Apple watch Ultra
+            return 55
+        case (324, 394): // Apple Watch SE (2nd gen) (40mm), Series 6 (40mm) UNUSED
             return 14
         default: // Fallback for unknown screen sizes
-            return 10
+            return 28
         }
     }()
 
     static let screenOffset: Int = {
-        switch (width, height) {
-        case (416, 496): // Apple Watch Series 10 (46mm)
+        print("Device Width: \(Int(width)), Height: \(Int(height))")
+        switch (Int(width), Int(height)) {
+        case (208, 248): // Apple Watch Series 10 (46mm)
             return 17
-        case (374, 446): // Apple Watch Series 10 (42mm)
+        case (187, 223): // Apple Watch Series 10 (42mm)
             return 17
-        case (368, 448): // Apple Watch SE (2nd gen) (44mm), Series 6, 7, 8, 9 (44mm)
+        case (162, 197): // Apple Watch SE (2nd gen) (44mm), Series 6, 7, 8, 9 (44mm)
+            return 20
+        case (184, 224): // Apple Watch Series 6
+            return 24
+        case (352, 430): // Apple Watch Series 7, 8, 9 (41mm) UNUSED
             return 6
-        case (352, 430): // Apple Watch Series 7, 8, 9 (41mm)
-            return 6
-        case (324, 394): // Apple Watch SE (2nd gen) (40mm), Series 6 (40mm)
+        case (205, 251): // Apple Watch Ultra
+            return 17
+        case (324, 394): // Apple Watch SE (2nd gen) (40mm), Series 6 (40mm) UNUSED
             return 5
         default: // Fallback for unknown screen sizes
             return 5

@@ -6,12 +6,13 @@
 //
 
 import SwiftUI
+import WatchKit
 
-// MARK: The main top bar view, Includes volume, settings, turorial, and AssistantName
+// MARK: The main top bar view, Includes volume, settings, tutorial, and AssistantName
 struct TopBar: View {
+    @ObservedObject var settings = AppSettings.shared
     @State private var assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
-    @State private var showVolumeControl = false
-    @State private var volume: Double = 50.0 // Default volume
+    @State private var showVolumeControl = false // State for volume control sheet
     @State private var showTutorial = false // State for tutorial view
     @FocusState private var isVolumeFocused: Bool // For Digital Crown focus
     @State private var isSmallWatch: Bool = false
@@ -21,52 +22,51 @@ struct TopBar: View {
             // Top Navigation Bar
             HStack {
                 // Left side with Volume, Settings, and Tutorial buttons
-                HStack(spacing: -5) { // Added spacing between buttons
+                HStack(spacing: -5) {
                     // Volume Button
                     Button(action: {
                         showVolumeControl.toggle()
                     }) {
                         Image(systemName: "speaker.wave.2.fill")
-                            .font(.title3) // Smaller icon
+                            .font(.title3)
                             .foregroundColor(.white)
                             .padding()
                             .background(
                                 Circle()
-                                    .fill(Color.gray.opacity(0.2)) // Circular background with slight opacity
+                                    .fill(Color.gray.opacity(0.2))
                             )
                     }
                     .frame(width: 50, height: 50)
                     .foregroundStyle(.clear)
                     .sheet(isPresented: $showVolumeControl) {
-                        VolumeControlView(volume: $volume)
+                        VolumeControlView()
                     }
 
                     // Settings Button
                     NavigationLink(destination: Settings()) {
                         Image(systemName: "gearshape.fill")
-                            .font(.title3) // Smaller icon
+                            .font(.title3)
                             .foregroundColor(.white)
                             .padding()
                             .background(
                                 Circle()
-                                    .fill(Color.gray.opacity(0.2)) // Circular background with slight opacity
+                                    .fill(Color.gray.opacity(0.2))
                             )
                     }
                     .frame(width: 50, height: 50)
                     .foregroundStyle(.clear)
 
-                
                     // Tutorial Button
                     Button(action: {
                         showTutorial.toggle()
                     }) {
                         Image(systemName: "questionmark.circle.fill")
-                            .font(.title3) // Smaller icon
+                            .font(.title3)
                             .foregroundColor(.white)
                             .padding()
                             .background(
                                 Circle()
-                                    .fill(Color.gray.opacity(0.2)) // Circular background with slight opacity
+                                    .fill(Color.gray.opacity(0.2))
                             )
                     }
                     .frame(width: 50, height: 50)
@@ -83,21 +83,21 @@ struct TopBar: View {
                     Text(assistantName)
                         .font(.subheadline)
                         .foregroundColor(.white)
-                        .padding(.top, 20) // Added padding to the right edge
+                        .padding(.top, 20)
                 }
             }
             .padding(.top, 10)
             .onAppear {
-                // Determine if the watch is small (you can adjust the width threshold)
-                isSmallWatch = WKInterfaceDevice.current().screenBounds.width < 200
+                // Determine if the watch is small (adjust the width threshold if necessary)
+                isSmallWatch = WKInterfaceDevice.current().screenBounds.width < 184 // Adjust based on device
             }
         }
     }
 }
 
-// MARK: The volume selector view, control with digital crown
+// MARK: The volume selector view, controlled with the Digital Crown
 struct VolumeControlView: View {
-    @Binding var volume: Double
+    @ObservedObject var settings = AppSettings.shared
     @FocusState private var isFocused: Bool
 
     var body: some View {
@@ -106,16 +106,16 @@ struct VolumeControlView: View {
                 .font(.headline)
                 .padding()
 
-            Text("Using Digital Crown")
+            Text("Use Digital Crown")
                 .font(.subheadline)
 
             // Volume Display
-            Text("\(Int(volume))%")
+            Text("\(Int(settings.volume))%")
                 .font(.largeTitle)
                 .padding()
                 .focusable(true)
                 .focused($isFocused)
-                .digitalCrownRotation($volume, from: 0, through: 100, by: 1, sensitivity: .medium, isContinuous: false)
+                .digitalCrownRotation($settings.volume, from: 0, through: 100, by: 1, sensitivity: .medium, isContinuous: false)
 
             Spacer()
         }
