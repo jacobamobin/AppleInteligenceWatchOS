@@ -79,12 +79,13 @@ struct TopBar: View {
                 Spacer()
 
                 // Assistant Name (conditionally displayed based on screen size)
+                /*
                 if !isSmallWatch {
                     Text(assistantName)
                         .font(.subheadline)
                         .foregroundColor(.white)
                         .padding(.top, 20)
-                }
+                }*/
             }
             .padding(.top, 10)
             .onAppear {

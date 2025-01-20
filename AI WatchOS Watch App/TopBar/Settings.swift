@@ -14,7 +14,8 @@ struct Settings: View {
     @State private var selectedOption: Int = UserDefaults.standard.integer(forKey: "SelectedOption")
     @State private var tts = TTS()
     @State private var showPrivacyPolicy = false
-    @State private var showTutorial = false  // Added state to track tutorial visibility
+    @State private var showTutorial = false
+    @State private var use24HourFormat: Bool = UserDefaults.standard.bool(forKey: "Use24HourFormat")
     
     let demoOptions = ["Alloy": ".alloy", "Echo": ".echo", "Fable": ".fable", "Onyx": ".onyx", "Nova": ".nova", "Shimmer": ".shimmer"]
     
@@ -32,6 +33,19 @@ struct Settings: View {
                     }
             }
             .padding()
+            
+            VStack(alignment: .leading, spacing: 16) {
+                // Existing settings components...
+                
+                Toggle(isOn: $use24HourFormat) {
+                    Text("Use 24-Hour Time")
+                        .font(.headline)
+                }
+                .onChange(of: use24HourFormat) { value in
+                    UserDefaults.standard.set(value, forKey: "Use24HourFormat")
+                }
+                .padding(.top, 16)
+            }
             
             VStack (spacing: 5){
                 SettingsButton(title: "How to Use", action: {

@@ -7,9 +7,10 @@
 
 import SwiftUI
 
-// MARK: Simple view for the HOUR/MINUITE clock on the homescreen
+// MARK: Simple view for the HOUR/MINUTE clock on the homescreen
 struct Clock: View {
     @State private var currentTime = CurrentTime()
+    @State private var timer: Timer?
 
     var body: some View {
         VStack(alignment: .center, spacing: -30) {
@@ -20,15 +21,32 @@ struct Clock: View {
             Text(currentTime.minute)
                 .font(.system(size: 90, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
-        }.padding(.bottom, 20)
+
+            /*
+            if let ampm = currentTime.ampm {
+                Text(ampm)
+                    .font(.title2)
+                    .foregroundColor(.white)
+                    .padding(.top, -20)
+            }
+             */
+        }
+        .padding(.bottom, 20)
         .onAppear {
             startClock()
         }
+        .onDisappear {
+            timer?.invalidate()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)) { _ in
+            // Update current time when UserDefaults changes
+            currentTime = CurrentTime()
+        }
     }
 
-    //Starts the clock on view load
+    // Starts the clock on view load
     private func startClock() {
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             currentTime = CurrentTime()
         }
     }
@@ -38,12 +56,29 @@ struct Clock: View {
 struct CurrentTime {
     let hour: String
     let minute: String
+    let ampm: String?
 
     init() {
         let now = Date()
         let calendar = Calendar.current
-        let hourInt = calendar.component(.hour, from: now)
+
+        // Read use24HourFormat from UserDefaults
+        let use24HourFormat = UserDefaults.standard.bool(forKey: "Use24HourFormat")
+
+        var hourInt = calendar.component(.hour, from: now)
         let minuteInt = calendar.component(.minute, from: now)
+
+        if !use24HourFormat {
+            // Convert to 12-hour format
+            let isPM = hourInt >= 12
+            ampm = isPM ? "PM" : "AM"
+            hourInt = hourInt % 12
+            if hourInt == 0 {
+                hourInt = 12
+            }
+        } else {
+            ampm = nil
+        }
 
         hour = String(format: "%02d", hourInt)
         minute = String(format: "%02d", minuteInt)
