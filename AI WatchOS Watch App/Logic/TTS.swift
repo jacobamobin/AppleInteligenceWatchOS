@@ -16,8 +16,17 @@ class TTS: ObservableObject {
 
     private var audioPlayer: AVAudioPlayer?
     private let openAI = OpenAI(apiToken: getChatGPTKey() ?? "")
-
+    
     public func generateAndPlayAudio(from text: String, voice: String) {
+        // Fetch the volume from AppSettings
+        let volumePercentage = AppSettings.shared.volume
+        
+        // If volume is zero, do not proceed
+        if volumePercentage == 0 {
+            isPlaying = false
+            return
+        }
+
         isPlaying = true
         errorMessage = nil
 
@@ -31,7 +40,7 @@ class TTS: ObservableObject {
             model: .tts_1,
             input: String(text.prefix(1500)),
             voice: selectedVoice,
-            responseFormat: .mp3, // Request mp3 format
+            responseFormat: .mp3,
             speed: 1.15
         )
 
@@ -41,7 +50,7 @@ class TTS: ObservableObject {
                 let result = try await openAI.audioCreateSpeech(query: query)
 
                 // Play audio data
-                try playAudio(data: result.audio)
+                try playAudio(data: result.audio, volumePercentage: volumePercentage)
             } catch {
                 DispatchQueue.main.async {
                     self.errorMessage = error.localizedDescription
@@ -73,7 +82,6 @@ class TTS: ObservableObject {
         }
     }
 
-
     private func setupAudioSession() {
         do {
             let session = AVAudioSession.sharedInstance()
@@ -84,9 +92,10 @@ class TTS: ObservableObject {
         }
     }
 
-    private func playAudio(data: Data) throws {
+    private func playAudio(data: Data, volumePercentage: Double) throws {
         do {
             audioPlayer = try AVAudioPlayer(data: data)
+            audioPlayer?.volume = Float(volumePercentage / 100.0)  // Set the player volume (0.0 to 1.0)
             audioPlayer?.prepareToPlay()
             audioPlayer?.play()
         } catch {
@@ -99,7 +108,3 @@ class TTS: ObservableObject {
         audioPlayer = nil
     }
 }
-
-
-
-

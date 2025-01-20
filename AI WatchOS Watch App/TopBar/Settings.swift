@@ -236,7 +236,7 @@ struct TutorialView: View {
 
                 Text("1. On the time screen start holding to talk")
                 Text("2. Release your finger to send the message")
-                Text("3. Tap on the response text to go back to the clock screen, or long hold to talk right away")
+                Text("3. Tap on the response text to go back to the clock screen")
                 Text("4. Adjust volume with the volume button")
                 Text("5. Go to settings to customize assistant name and voice")
 
