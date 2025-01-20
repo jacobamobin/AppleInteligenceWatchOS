@@ -93,6 +93,11 @@ class TTS: ObservableObject {
             print("Failed to initialize AVAudioPlayer: \(error)")
         }
     }
+    
+    func stopPlayback() {
+        audioPlayer?.stop()
+        audioPlayer = nil
+    }
 }
 
 

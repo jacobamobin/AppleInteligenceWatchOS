@@ -45,10 +45,10 @@ struct Settings: View {
                 SettingsButton(title: "Restore Purchases", action: {
                     restorePurchases()
                 })
-                
+                /*
                 SettingsButton(title: "Open GitHub", action: {
                     openGitHub()
-                })
+                })*/
                 
                 Text("App Version: \(getAppVersion())")
                     .font(.footnote)

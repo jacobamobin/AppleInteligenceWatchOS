@@ -12,7 +12,6 @@ import OpenAI
 import WatchKit
 
 // MARK: The main handler for all the views
-// TODO: Fix reactivate Mic
 struct ContentView: View {
     // assistantName || What the LLM refers to itself as
     // selectedVoice || The voice OpenAI's Whisper API uses, default is .alloy
@@ -32,7 +31,7 @@ struct ContentView: View {
     @State private var rewriteText = ""
     @State private var isPressed = false
     @State private var reactivateMic = false
-    @State private var isThinking = false // New state to track "thinking" animation
+    @State private var isThinking = false // State to track "thinking" animation
 
     var body: some View {
         ZStack {
@@ -58,6 +57,7 @@ struct ContentView: View {
                     .foregroundStyle(Color.clear)
                     .onLongPressGesture(minimumDuration: 0.1, pressing: { isPressing in
                         if isPressing {
+                            tts.stopPlayback()
                             WKInterfaceDevice.current().play(.success)
                             Microphone.startRecording()
                             isPressed = true
@@ -71,7 +71,7 @@ struct ContentView: View {
                             
                             Microphone.stopRecording { text in
                                 recognizedText = text // Capture transcribed text
-                            
+                                
                                 displayText = sendRequest(userPrompt: recognizedText) // Fetch result
                                 WKInterfaceDevice.current().play(.success)
                                 
@@ -108,18 +108,29 @@ struct ContentView: View {
                                         .padding(.top, 15)
                                 }.frame(
                                     width: WKInterfaceDevice.current().screenBounds.width,
-                                    height: WKInterfaceDevice.current().screenBounds.height-25
+                                    height: WKInterfaceDevice.current().screenBounds.height - 25
                                 )
                             }
                             .foregroundStyle(Color.clear)
-                            .onLongPressGesture {
-                                withAnimation {
-                                    // Set reactivateMic flag to true to trigger mic reactivation
+                            .onLongPressGesture(minimumDuration: 0.1, pressing: { isPressing in
+                                if isPressing {
+                                    tts.stopPlayback()
                                     WKInterfaceDevice.current().play(.success)
-                                    reactivateMic = true
-                                    state = false // Transition to Home screen
+                                    Microphone.startRecording()
+                                    isThinking = false // Ensure thinking animation is off while recording
+                                } else {
+                                    withAnimation {
+                                        isThinking = true // Show thinking animation
+                                    }
+                                    Microphone.stopRecording { text in
+                                        recognizedText = text // Capture transcribed text
+                                        
+                                        displayText = sendRequest(userPrompt: recognizedText) // Fetch result
+                                        WKInterfaceDevice.current().play(.success)
+                                        isThinking = false // Hide thinking animation after processing
+                                    }
                                 }
-                            }
+                            }, perform: {})
                         }
                     }
                     .frame(
@@ -127,6 +138,20 @@ struct ContentView: View {
                         height: WKInterfaceDevice.current().screenBounds.width
                     )
                 }
+                // Show progress indicator when isThinking is true
+                .overlay(
+                    Group {
+                        if isThinking {
+                            ZStack {
+                                Color.black.opacity(0.5)
+                                    .edgesIgnoringSafeArea(.all)
+                                ProgressView("Thinking...")
+                                    .progressViewStyle(CircularProgressViewStyle())
+                                    .foregroundColor(.white)
+                            }
+                        }
+                    }
+                )
             }
         }
         .animation(.smooth(duration: 0.2), value: state)
@@ -151,9 +176,6 @@ struct ContentView: View {
         }
     }
 }
-
-
-
 
 #Preview {
     ContentView()
