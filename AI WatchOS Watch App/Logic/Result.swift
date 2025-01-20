@@ -33,7 +33,7 @@ func sendRequest(userPrompt: String) -> String {
             ["role": "system", "content": "Your name is \(assistantName) and you are a WatchOS assistant on the user's wrist, act like you are having a normal conversation with the user, and answer any questions the user asks. Be a helpful, useful assistant and remember your name is \(assistantName), Keep your answers under 150 words if possible. If you get a sound error, like 0.1 secconds related ignore it and return I 'couldnt hear that sorry'"],
             ["role": "user", "content": userPrompt]
         ],
-        "max_tokens": 100,
+        "max_tokens": 400,
         "temperature": 0.2,
         "top_p": 0.9,
         "search_domain_filter": ["perplexity.ai"],

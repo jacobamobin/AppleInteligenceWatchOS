@@ -92,7 +92,7 @@ struct ContentView: View {
                     NavigationView {
                         VStack {
                             TopBar()
-                                .padding(.bottom, 95)
+                                .padding(.bottom, 110)
                                 .padding(.trailing, 10)
                                 .padding(.top, 10)
                                 .frame(height: 50)
