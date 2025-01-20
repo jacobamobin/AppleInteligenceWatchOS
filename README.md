@@ -12,7 +12,13 @@ Go download on the [AppStore](https://www.google.com/search?q=coming+soon)
 > [!Tip]
 > If your looking for just the [Glow Animations](https://github.com/jacobamobin/AppleIntelligenceGlowEffect) you can find them here
 
-# Features/Guide
+# Features 
+- Customizable assistant name
+- Customizable assistant voices (6)
+- Chose 12/24 hour time on clockface
+- Animated glow effect optimized for battery
+
+# Guide
 - Hold on the clock screen and start speaking
 - Once your done speaking let go of the screen
 - Your prompt will get sent to Perplexity
