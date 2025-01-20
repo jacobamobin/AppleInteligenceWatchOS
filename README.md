@@ -28,6 +28,9 @@ Go download on the [AppStore](https://www.google.com/search?q=coming+soon)
 # Privacy Policy
 Check out the [Privacy Policy](PRIVACY.md)
 
+# Appstore Version
+![AppstoreImage](ReadMe/Appstore.png)
+
 # Setup
 > [!Warning]
 > I highly suggest using the AppStore version, otherwise to follow the following steps you will need a [Perplexity](https://docs.perplexity.ai/home) and [OpenAI](https://platform.openai.com/docs) Api key.
