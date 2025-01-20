@@ -28,7 +28,7 @@ Go download on the [AppStore](https://www.google.com/search?q=coming+soon)
 # Privacy Policy
 Check out the [Privacy Policy](PRIVACY.md)
 
-# Appstore Version
+# [Appstore Version]()
 ![AppstoreImage](ReadMe/Appstore.png)
 
 # Setup
