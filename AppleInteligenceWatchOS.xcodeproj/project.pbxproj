@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2C45568C2D2DEDE60036C39F /* OpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = 2C45568B2D2DEDE60036C39F /* OpenAI */; };
+		2CFE97BC2D3ED3A20003628A /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 2CFE97BB2D3ED39A0003628A /* .gitignore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,9 +25,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		2C2662C62D31C9860024E088 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		2C2662C82D31C9860024E088 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		2C4556672D2B466B0036C39F /* AI WatchOS Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AI WatchOS Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2CFE97BB2D3ED39A0003628A /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -52,7 +53,6 @@
 		2C2662C52D31C9860024E088 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				2C2662C62D31C9860024E088 /* WidgetKit.framework */,
 				2C2662C82D31C9860024E088 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
@@ -64,6 +64,7 @@
 				2C45566B2D2B466B0036C39F /* AI WatchOS Watch App */,
 				2C2662C52D31C9860024E088 /* Frameworks */,
 				2C4556502D2B45990036C39F /* Products */,
+				2CFE97BB2D3ED39A0003628A /* .gitignore */,
 			);
 			sourceTree = "<group>";
 		};
@@ -144,6 +145,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2CFE97BC2D3ED3A20003628A /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
