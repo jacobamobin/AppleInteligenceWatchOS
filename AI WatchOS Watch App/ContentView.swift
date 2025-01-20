@@ -24,7 +24,7 @@ struct ContentView: View {
     // reactivateMic || Boolean that controls jumping from response
     @State private var assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
     @State private var selectedVoice: String = UserDefaults.standard.string(forKey: "SelectedVoice") ?? ".alloy"
-    @State private var state = false
+    @State private var state = true
     @State private var recognizedText = ""
     @State private var tts = TTS()
     @State private var displayText = ""
@@ -68,19 +68,19 @@ struct ContentView: View {
                                 isThinking = true // Show thinking animation
                                 isPressed = false // Hide assistant animation
                             }
-                            
+
                             Microphone.stopRecording { text in
                                 recognizedText = text // Capture transcribed text
-                                
+
                                 displayText = sendRequest(userPrompt: recognizedText) // Fetch result
                                 WKInterfaceDevice.current().play(.success)
-                                
+
                                 withAnimation {
                                     state = true // Transition to Result view
                                     WKInterfaceDevice.current().play(.success)
                                 }
                                 isThinking = false // Hide thinking animation after processing
-                                
+
                             }
                         }
                     }, perform: {})
@@ -89,29 +89,28 @@ struct ContentView: View {
             } else { // If Response Screen state
                 VStack {
                     NavigationView {
-                        VStack {
+                        VStack(spacing: 0) {
                             TopBar()
-                                .padding(.bottom, 95)
-                                .padding(.trailing, 10)
-                                .padding(.top, 10)
-                                .frame(height: 50)
-                            Button {
+                                .padding(.top, -30)
+                                .frame(height: 40)
+
+                            // ScrollView with gestures attached
+                            ScrollView {
+                                Text(displayText + "\n\n\n")
+                                    .multilineTextAlignment(.leading)
+                                    .foregroundStyle(Color.white)
+                                    .padding(.top, 15)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .frame(
+                                width: WKInterfaceDevice.current().screenBounds.width,
+                                height: WKInterfaceDevice.current().screenBounds.height - 75 // Adjusted height to account for TopBar
+                            )
+                            .onTapGesture {
                                 withAnimation {
                                     state = false
                                 }
-                            } label: {
-                                // ScrollView with long press gesture
-                                ScrollView {
-                                    Text(displayText + "\n \n \n")
-                                        .multilineTextAlignment(.leading)
-                                        .foregroundStyle(Color.white)
-                                        .padding(.top, 15)
-                                }.frame(
-                                    width: WKInterfaceDevice.current().screenBounds.width,
-                                    height: WKInterfaceDevice.current().screenBounds.height - 25
-                                )
                             }
-                            .foregroundStyle(Color.clear)
                             .onLongPressGesture(minimumDuration: 0.1, pressing: { isPressing in
                                 if isPressing {
                                     tts.stopPlayback()
@@ -124,7 +123,7 @@ struct ContentView: View {
                                     }
                                     Microphone.stopRecording { text in
                                         recognizedText = text // Capture transcribed text
-                                        
+
                                         displayText = sendRequest(userPrompt: recognizedText) // Fetch result
                                         WKInterfaceDevice.current().play(.success)
                                         isThinking = false // Hide thinking animation after processing
@@ -135,7 +134,7 @@ struct ContentView: View {
                     }
                     .frame(
                         width: WKInterfaceDevice.current().screenBounds.width,
-                        height: WKInterfaceDevice.current().screenBounds.width
+                        height: WKInterfaceDevice.current().screenBounds.height
                     )
                 }
                 // Show progress indicator when isThinking is true

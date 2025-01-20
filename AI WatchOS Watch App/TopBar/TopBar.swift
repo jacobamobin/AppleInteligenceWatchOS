@@ -79,18 +79,19 @@ struct TopBar: View {
                 Spacer()
 
                 // Assistant Name (conditionally displayed based on screen size)
-                /*
+                
                 if !isSmallWatch {
                     Text(assistantName)
                         .font(.subheadline)
                         .foregroundColor(.white)
                         .padding(.top, 20)
-                }*/
+                        .lineLimit(1)
+                }
             }
             .padding(.top, 10)
             .onAppear {
                 // Determine if the watch is small (adjust the width threshold if necessary)
-                isSmallWatch = WKInterfaceDevice.current().screenBounds.width < 184 // Adjust based on device
+                isSmallWatch = WKInterfaceDevice.current().screenBounds.width < 200 // Adjust based on device
             }
         }
     }
