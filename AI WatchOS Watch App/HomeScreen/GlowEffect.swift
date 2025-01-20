@@ -8,32 +8,31 @@
 import SwiftUI
 import WatchKit
 
-// MARK: The apple inteligence glow effect function
+// MARK: The Apple intelligence glow effect function
 // It is made up of 4 different layers.
 struct GlowEffect: View {
     @State private var gradientStops: [Gradient.Stop] = GlowEffect.generateGradientStops()
     @State private var timers: [Timer] = []
 
     var freeze: Bool
-    
-    let cornerRoundness: Int = DeviceConfig.cornerRoundness
-    let screenOffset: Int = DeviceConfig.screenOffset
+
+    // Fetch the combined device properties
+    let deviceProperties = DeviceConfig.deviceProperties
 
     var body: some View {
         ZStack {
             // First layer is the border around the edge
             // The next 3 layers are the blurry layers closer to the middle of the screen
-            EffectNoBlur(gradientStops: gradientStops, width: 5, cornerRoundness: DeviceConfig.cornerRoundness, screenOffset: DeviceConfig.screenOffset)
-            Effect(gradientStops: gradientStops, width: 7, blur: 4, cornerRoundness: DeviceConfig.cornerRoundness, screenOffset: DeviceConfig.screenOffset)
-            Effect(gradientStops: gradientStops, width: 9, blur: 12, cornerRoundness: DeviceConfig.cornerRoundness, screenOffset: DeviceConfig.screenOffset)
-            Effect(gradientStops: gradientStops, width: 12, blur: 15, cornerRoundness: DeviceConfig.cornerRoundness, screenOffset: DeviceConfig.screenOffset)
+            EffectNoBlur(gradientStops: gradientStops, width: 5, deviceProperties: deviceProperties)
+            Effect(gradientStops: gradientStops, width: 7, blur: 4, deviceProperties: deviceProperties)
+            Effect(gradientStops: gradientStops, width: 9, blur: 12, deviceProperties: deviceProperties)
+            Effect(gradientStops: gradientStops, width: 12, blur: 15, deviceProperties: deviceProperties)
         }
-        .onAppear { // On appread
+        .onAppear {
             if !freeze {
                 startTimers()
             }
         }
-        // Check if the view should be frozen
         .onChange(of: freeze) { isFrozen in
             if isFrozen {
                 stopTimers()
@@ -77,22 +76,19 @@ struct GlowEffect: View {
             Gradient.Stop(color: Color(hex: "C686FF"), location: Double.random(in: 0...1))
         ].sorted { $0.location < $1.location }
     }
-    
-    // MARK: Calculate paramaters for the glow effect based on screen size of the watch
-    
 }
 
 // MARK: These Effect Functions generate the different layers that make up the gradient effect
-//Effect means the layers have a Blur (inner 3 layers)
+
+// Effect with blur for the inner layers
 struct Effect: View {
     var gradientStops: [Gradient.Stop]
     var width: Double
     var blur: Double
-    var cornerRoundness: Int
-    var screenOffset: Int
+    var deviceProperties: (cornerRoundness: Int, screenOffset: Int)
 
     var body: some View {
-        RoundedRectangle(cornerRadius: CGFloat(cornerRoundness))
+        RoundedRectangle(cornerRadius: CGFloat(deviceProperties.cornerRoundness))
             .strokeBorder(
                 AngularGradient(
                     gradient: Gradient(stops: gradientStops),
@@ -104,20 +100,19 @@ struct Effect: View {
                 width: WKInterfaceDevice.current().screenBounds.width,
                 height: WKInterfaceDevice.current().screenBounds.height
             )
-            .padding(.top, -1 * CGFloat(screenOffset))
+            .padding(.top, -1 * CGFloat(deviceProperties.screenOffset))
             .blur(radius: blur)
     }
 }
 
-//Effect no blur if for the last layer on the very edge of the screen
+// Effect without blur for the outermost layer
 struct EffectNoBlur: View {
     var gradientStops: [Gradient.Stop]
     var width: Double
-    var cornerRoundness: Int
-    var screenOffset: Int
+    var deviceProperties: (cornerRoundness: Int, screenOffset: Int)
 
     var body: some View {
-        RoundedRectangle(cornerRadius: CGFloat(cornerRoundness))
+        RoundedRectangle(cornerRadius: CGFloat(deviceProperties.cornerRoundness))
             .strokeBorder(
                 AngularGradient(
                     gradient: Gradient(stops: gradientStops),
@@ -129,11 +124,11 @@ struct EffectNoBlur: View {
                 width: WKInterfaceDevice.current().screenBounds.width,
                 height: WKInterfaceDevice.current().screenBounds.height
             )
-            .padding(.top, -1 * CGFloat(screenOffset))
+            .padding(.top, -1 * CGFloat(deviceProperties.screenOffset))
     }
 }
 
-// MARK: Color function that converts HEX (From figma) into RGB values for SwiftUI
+// MARK: Color extension that converts HEX values into RGB for SwiftUI
 extension Color {
     init(hex: String) {
         let scanner = Scanner(string: hex)
@@ -154,53 +149,27 @@ extension Color {
 struct DeviceConfig {
     static let width = WKInterfaceDevice.current().screenBounds.width
     static let height = WKInterfaceDevice.current().screenBounds.height
-    
-    init() {
-         print("Device Width: \(DeviceConfig.width), Height: \(DeviceConfig.height)")
-    }
 
-    // Calculate corner roundness and screen offset
-    static let cornerRoundness: Int = {
+    // MARK: Combined cornerRoundness and screenOffset
+    static let deviceProperties: (cornerRoundness: Int, screenOffset: Int) = {
         print("Device Width: \(Int(width)), Height: \(Int(height))")
         switch (Int(width), Int(height)) {
+        case (205, 251): // Apple Watch Ultra 1, 2 (49mm)
+            return (55, 17)
         case (208, 248): // Apple Watch Series 10 (46mm)
-            return 50
+            return (50, 17)
         case (187, 223): // Apple Watch Series 10 (42mm)
-            return 45
-        case (162, 197): // Apple Watch SE (2nd gen) (44mm), Series 6, 7, 8, 9 (44mm)
-            return 28
-        case (184, 224): // Apple Watch Series 6
-            return 34
-        case (352, 430): // Apple Watch Series 7, 8, 9 (41mm) UNUSED
-            return 16
-        case (205, 251): //Apple watch Ultra
-            return 55
-        case (324, 394): // Apple Watch SE (2nd gen) (40mm), Series 6 (40mm) UNUSED
-            return 14
+            return (45, 17)
+        case (198,242):  // Apple Watch Series 9, 8, 7 (45mm)
+            return (42, 24)
+        case (176,215):  // Apple Watch Series 9, 8, 7 (41mm)
+            return (40, 20)
+        case (184, 224): // Apple Watch Series 6 (44mm) + SE (44mm)
+            return (35, 25)
+        case (162, 197): // Apple Watch Series 6 (40mm) + SE (40mm)
+            return (28, 20)
         default: // Fallback for unknown screen sizes
-            return 28
-        }
-    }()
-
-    static let screenOffset: Int = {
-        print("Device Width: \(Int(width)), Height: \(Int(height))")
-        switch (Int(width), Int(height)) {
-        case (208, 248): // Apple Watch Series 10 (46mm)
-            return 17
-        case (187, 223): // Apple Watch Series 10 (42mm)
-            return 17
-        case (162, 197): // Apple Watch SE (2nd gen) (44mm), Series 6, 7, 8, 9 (44mm)
-            return 20
-        case (184, 224): // Apple Watch Series 6
-            return 24
-        case (352, 430): // Apple Watch Series 7, 8, 9 (41mm) UNUSED
-            return 6
-        case (205, 251): // Apple Watch Ultra
-            return 17
-        case (324, 394): // Apple Watch SE (2nd gen) (40mm), Series 6 (40mm) UNUSED
-            return 5
-        default: // Fallback for unknown screen sizes
-            return 5
+            return (50, 17)
         }
     }()
 }
