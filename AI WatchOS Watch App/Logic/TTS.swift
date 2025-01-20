@@ -38,7 +38,7 @@ class TTS: ObservableObject {
 
         let query = AudioSpeechQuery(
             model: .tts_1,
-            input: String(text.prefix(1500)),
+            input: String(text.prefix(2000)),
             voice: selectedVoice,
             responseFormat: .mp3,
             speed: 1.15
