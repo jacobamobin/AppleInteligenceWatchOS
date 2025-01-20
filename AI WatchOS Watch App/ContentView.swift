@@ -12,6 +12,7 @@ import OpenAI
 import WatchKit
 
 // MARK: The main handler for all the views
+// TODO: Fix reactivate Mic
 struct ContentView: View {
     // assistantName || What the LLM refers to itself as
     // selectedVoice || The voice OpenAI's Whisper API uses, default is .alloy
@@ -24,14 +25,14 @@ struct ContentView: View {
     // reactivateMic || Boolean that controls jumping from response
     @State private var assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
     @State private var selectedVoice: String = UserDefaults.standard.string(forKey: "SelectedVoice") ?? ".alloy"
-    @State private var state = true
+    @State private var state = false
     @State private var recognizedText = ""
     @State private var tts = TTS()
     @State private var displayText = ""
     @State private var rewriteText = ""
     @State private var isPressed = false
     @State private var reactivateMic = false
-    @State private var isThinking = false // State to track "thinking" animation
+    @State private var isThinking = false // New state to track "thinking" animation
 
     var body: some View {
         ZStack {
@@ -68,19 +69,19 @@ struct ContentView: View {
                                 isThinking = true // Show thinking animation
                                 isPressed = false // Hide assistant animation
                             }
-
+                            
                             Microphone.stopRecording { text in
                                 recognizedText = text // Capture transcribed text
-
+                            
                                 displayText = sendRequest(userPrompt: recognizedText) // Fetch result
                                 WKInterfaceDevice.current().play(.success)
-
+                                
                                 withAnimation {
                                     state = true // Transition to Result view
                                     WKInterfaceDevice.current().play(.success)
                                 }
                                 isThinking = false // Hide thinking animation after processing
-
+                                
                             }
                         }
                     }, perform: {})
@@ -89,68 +90,44 @@ struct ContentView: View {
             } else { // If Response Screen state
                 VStack {
                     NavigationView {
-                        VStack(spacing: 0) {
+                        VStack {
                             TopBar()
-                                .padding(.top, -30)
-                                .frame(height: 40)
-
-                            // ScrollView with gestures attached
-                            ScrollView {
-                                Text(displayText + "\n\n\n")
-                                    .multilineTextAlignment(.leading)
-                                    .foregroundStyle(Color.white)
-                                    .padding(.top, 15)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                            .frame(
-                                width: WKInterfaceDevice.current().screenBounds.width,
-                                height: WKInterfaceDevice.current().screenBounds.height - 75 // Adjusted height to account for TopBar
-                            )
-                            .onTapGesture {
+                                .padding(.bottom, 95)
+                                .padding(.trailing, 10)
+                                .padding(.top, 10)
+                                .frame(height: 50)
+                            Button {
                                 withAnimation {
                                     state = false
                                 }
+                            } label: {
+                                // ScrollView with long press gesture
+                                ScrollView {
+                                    Text(displayText + "\n \n \n")
+                                        .multilineTextAlignment(.leading)
+                                        .foregroundStyle(Color.white)
+                                }.frame(
+                                    width: WKInterfaceDevice.current().screenBounds.width,
+                                    height: WKInterfaceDevice.current().screenBounds.height-25
+                                )
                             }
-                            .onLongPressGesture(minimumDuration: 0.1, pressing: { isPressing in
-                                if isPressing {
+                            .foregroundStyle(Color.clear)
+                            .onLongPressGesture {
+                                withAnimation {
                                     tts.stopPlayback()
+                                    // Set reactivateMic flag to true to trigger mic reactivation
                                     WKInterfaceDevice.current().play(.success)
-                                    Microphone.startRecording()
-                                    isThinking = false // Ensure thinking animation is off while recording
-                                } else {
-                                    withAnimation {
-                                        isThinking = true // Show thinking animation
-                                    }
-                                    Microphone.stopRecording { text in
-                                        recognizedText = text // Capture transcribed text
-
-                                        displayText = sendRequest(userPrompt: recognizedText) // Fetch result
-                                        WKInterfaceDevice.current().play(.success)
-                                        isThinking = false // Hide thinking animation after processing
-                                    }
+                                    reactivateMic = true
+                                    state = false // Transition to Home screen
                                 }
-                            }, perform: {})
+                            }
                         }
                     }
                     .frame(
                         width: WKInterfaceDevice.current().screenBounds.width,
-                        height: WKInterfaceDevice.current().screenBounds.height
+                        height: WKInterfaceDevice.current().screenBounds.width
                     )
                 }
-                // Show progress indicator when isThinking is true
-                .overlay(
-                    Group {
-                        if isThinking {
-                            ZStack {
-                                Color.black.opacity(0.5)
-                                    .edgesIgnoringSafeArea(.all)
-                                ProgressView("Thinking...")
-                                    .progressViewStyle(CircularProgressViewStyle())
-                                    .foregroundColor(.white)
-                            }
-                        }
-                    }
-                )
             }
         }
         .animation(.smooth(duration: 0.2), value: state)
@@ -175,6 +152,9 @@ struct ContentView: View {
         }
     }
 }
+
+
+
 
 #Preview {
     ContentView()
