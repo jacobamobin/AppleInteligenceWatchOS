@@ -169,8 +169,9 @@ struct DeviceConfig {
         case (162, 197): // Apple Watch Series 6 (40mm) + SE (40mm)
             return (28, 20)
         default: // Fallback for unknown screen sizes
-            return (50, 17)
+            return (28, 10)
         }
+         
     }()
 }
 
