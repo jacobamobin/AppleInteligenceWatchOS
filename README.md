@@ -3,11 +3,11 @@ Making your apple watch even more powerful!
 
 Go watch the [Youtube Video](https://www.google.com/search?q=coming+soon) (Coming Soon)
 
-# Video Demo
-https://github.com/user-attachments/assets/3014b8ec-f642-4b99-b2aa-6d573df80a85
-
 ![Github1](ReadMe/Github1.png)
 ![Github2](ReadMe/Github2.png)
+
+# Video Demo
+https://github.com/user-attachments/assets/3014b8ec-f642-4b99-b2aa-6d573df80a85
 
 - Powered by Perplexity (Data and Responses) and ChatGPT (Whisper and TTS)
 > [!Tip]
