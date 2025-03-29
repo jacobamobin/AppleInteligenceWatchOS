@@ -5,7 +5,7 @@ Go watch the [Youtube Video](https://www.google.com/search?q=coming+soon) (Comin
 
 # Video Demo
 
-![VideoDemo](ReadMe/Demo.mov)
+![VideoDemo](ReadMe/Demo.mp4)
 
 ![Github1](ReadMe/Github1.png)
 ![Github2](ReadMe/Github2.png)
