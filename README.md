@@ -1,9 +1,8 @@
 ![Banner](ReadMe/Header2.png)
 Making your apple watch even more powerful!
 
-Go watch the [Youtube Video](https://www.google.com/search?q=coming+soon)
+Go watch the [Youtube Video](https://www.google.com/search?q=coming+soon) (Coming Soon)
 
-Go download on the [AppStore](https://www.google.com/search?q=coming+soon)
 
 ![Github1](ReadMe/Github1.png)
 ![Github2](ReadMe/Github2.png)
@@ -27,9 +26,6 @@ Go download on the [AppStore](https://www.google.com/search?q=coming+soon)
 
 # Privacy Policy
 Check out the [Privacy Policy](PRIVACY.md)
-
-# [Appstore Version]()
-![AppstoreImage](ReadMe/Appstore.png)
 
 # Setup
 > [!Warning]
