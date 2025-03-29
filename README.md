@@ -3,6 +3,9 @@ Making your apple watch even more powerful!
 
 Go watch the [Youtube Video](https://www.google.com/search?q=coming+soon) (Coming Soon)
 
+# Video Demo
+
+![VideoDemo](ReadMe/Demo.mov)
 
 ![Github1](ReadMe/Github1.png)
 ![Github2](ReadMe/Github2.png)
