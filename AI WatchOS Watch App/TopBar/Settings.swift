@@ -2,247 +2,137 @@
 //  Settings.swift
 //  AI WatchOS Watch App
 //
-//  Created by Jacob Mobin on 1/8/25.
+//  Created by Jacob Mobin on 2025-01-05.
 //
 
 import SwiftUI
 import WatchKit
 
-// MARK: The main settings page view
 struct Settings: View {
-    @State private var assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
-    @State private var selectedOption: Int = UserDefaults.standard.integer(forKey: "SelectedOption")
-    @State private var tts = TTS()
-    @State private var showPrivacyPolicy = false
-    @State private var showTutorial = false
-    @State private var use24HourFormat: Bool = UserDefaults.standard.bool(forKey: "Use24HourFormat")
+    @State private var assistantName = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
+    @State private var selectedVoice = UserDefaults.standard.string(forKey: "SelectedVoice") ?? ".alloy"
+    @ObservedObject private var appSettings = AppSettings.shared
+    @ObservedObject private var chatMemory = ChatMemory.shared
+    @State private var showingClearConfirmation = false
     
-    let demoOptions = ["Alloy": ".alloy", "Echo": ".echo", "Fable": ".fable", "Onyx": ".onyx", "Nova": ".nova", "Shimmer": ".shimmer"]
-    
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                AssistantNameInput(assistantName: $assistantName)
-                    .onChange(of: assistantName) { newValue in
-                        saveAssistantName(newValue)
-                    }
-                
-                AssistantVoiceSelector(selectedOption: $selectedOption, demoOptions: demoOptions, assistantName: assistantName, tts: tts)
-                    .onChange(of: selectedOption) { newValue in
-                        saveSelectedOption(newValue)
-                    }
-            }
-            .padding()
-            
-            VStack(alignment: .leading, spacing: 16) {
-                // Existing settings components...
-                
-                Toggle(isOn: $use24HourFormat) {
-                    Text("Use 24-Hour Time")
-                        .font(.headline)
-                }
-                .onChange(of: use24HourFormat) { value in
-                    UserDefaults.standard.set(value, forKey: "Use24HourFormat")
-                }
-                .padding(.top, 16)
-            }
-            
-            VStack (spacing: 5){
-                SettingsButton(title: "How to Use", action: {
-                    showTutorial.toggle()  // Toggle tutorial visibility
-                })
-                
-                SettingsButton(title: "Privacy Policy", action: {
-                    showPrivacyPolicy.toggle()
-                })
-                
-                SettingsButton(title: "Restore Purchases", action: {
-                    restorePurchases()
-                })
-                /*
-                SettingsButton(title: "Open GitHub", action: {
-                    openGitHub()
-                })*/
-                
-                Text("App Version: \(getAppVersion())")
-                    .font(.footnote)
-                    .foregroundColor(.gray)
-                    .padding(.top, 16)
-            }
-        }
-        .sheet(isPresented: $showPrivacyPolicy) {
-            PrivacyPolicyView()
-        }
-        .sheet(isPresented: $showTutorial) {  // Show Tutorial view as a sheet
-            TutorialView()
-        }
-    }
-    
-    func getAppVersion() -> String {
-        if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-            return version
-        }
-        return "Unknown"
-    }
-    
-    func restorePurchases() {
-        print("Restoring purchases...")
-    }
-    
-    func openGitHub() {
-        if let url = URL(string: "https://github.com/jacobamobin/AppleIntelligenceWatchOS") {
-            WKExtension.shared().openSystemURL(url)
-        }
-    }
-    
-    // Save assistant Name
-    func saveAssistantName(_ name: String) {
-        UserDefaults.standard.set(name, forKey: "AssistantName")
-    }
-    
-    // Save assistant Voice
-    func saveSelectedOption(_ option: Int) {
-        UserDefaults.standard.set(option, forKey: "SelectedOption")
-    }
-}
+    // Voice options
+    let voices = [
+        (".alloy", "Alloy"),
+        (".echo", "Echo"),
+        (".fable", "Fable"),
+        (".onyx", "Onyx"),
+        (".nova", "Nova"),
+        (".shimmer", "Shimmer")
+    ]
 
-
-// MARK: THe text field in which you chose the assistant name
-struct AssistantNameInput: View {
-    @Binding var assistantName: String
-    
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Assistant Name")
-                .font(.headline)
-            TextField("Enter name", text: $assistantName)
-                .textFieldStyle(.automatic)
-        }
-    }
-}
-
-// MARK: The assistant voice selector builder (Voice Testing + Name)
-struct AssistantVoiceSelector: View {
-    @Binding var selectedOption: Int
-    let demoOptions: [String: String]
-    let assistantName: String
-    let tts: TTS
-    
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text("Assistant Voice")
-                .font(.headline)
-            
-            VStack(spacing: 12) {
-                ForEach(0..<demoOptions.count, id: \.self) { index in
+        NavigationView {
+            List {
+                // Assistant Configuration
+                Section("Assistant") {
                     HStack {
-                        VoiceButton(title: demoOptions.keys.sorted()[index], selected: selectedOption == index) {
-                            selectedOption = index
-                            UserDefaults.standard.set(demoOptions.values.sorted()[index], forKey: "SelectedVoice")
+                        Text("Name")
+                        Spacer()
+                        TextField("Assistant Name", text: $assistantName)
+                            .multilineTextAlignment(.trailing)
+                            .onSubmit {
+                                UserDefaults.standard.set(assistantName, forKey: "AssistantName")
+                                WKInterfaceDevice.current().play(.click)
+                            }
+                    }
+                }
+                
+                // Voice Configuration
+                Section("Voice") {
+                    Picker("Voice", selection: $selectedVoice) {
+                        ForEach(voices, id: \.0) { voice in
+                            Text(voice.1).tag(voice.0)
                         }
-                        
-                        PlayButton {
-                            let selectedVoice = demoOptions.values.sorted()[index]
-                            let greeting = "Hi, I'm \(assistantName), here to help you with your everyday needs."
-                            tts.generateAndPlayAudio(from: greeting, voice: selectedVoice)
+                    }
+                    .pickerStyle(NavigationLinkPickerStyle())
+                    .onChange(of: selectedVoice) { newVoice in
+                        UserDefaults.standard.set(newVoice, forKey: "SelectedVoice")
+                        WKInterfaceDevice.current().play(.click)
+                    }
+                    
+                    VStack(alignment: .leading) {
+                        HStack {
+                            Text("Volume")
+                            Spacer()
+                            Text("\(Int(appSettings.volume))%")
+                                .foregroundColor(.gray)
                         }
+                        Slider(value: $appSettings.volume, in: 0...100, step: 10)
+                            .tint(.blue)
+                    }
+                }
+                
+                // Memory Management
+                Section("Memory") {
+                    HStack {
+                        Text("Conversations")
+                        Spacer()
+                        Text("\(chatMemory.messages.count / 2)")
+                            .foregroundColor(.gray)
+                    }
+                    
+                    if !chatMemory.messages.isEmpty {
+                        Button("Clear Memory") {
+                            showingClearConfirmation = true
+                        }
+                        .foregroundColor(.red)
+                    }
+                    
+                    Text("Keeps last 20 exchanges for context")
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                }
+                
+                // Performance Settings
+                Section("Performance") {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Recording Limit")
+                        Text("30 seconds maximum")
+                            .font(.caption2)
+                            .foregroundColor(.gray)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Response Limit")
+                        Text("200 tokens maximum")
+                            .font(.caption2)
+                            .foregroundColor(.gray)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Streaming")
+                        Text("Enabled for faster responses")
+                            .font(.caption2)
+                            .foregroundColor(.gray)
+                    }
+                }
+                
+                // App Info
+                Section("About") {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Enhanced AI Assistant")
+                        Text("Streaming • Memory • Fast Response")
+                            .font(.caption2)
+                            .foregroundColor(.gray)
                     }
                 }
             }
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
         }
-    }
-}
-
-
-// MARK: Shows the assistant voices, whichever one is selected is in Blue
-struct VoiceButton: View {
-    let title: String
-    let selected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.body)
-                .foregroundColor(selected ? .white : .white)
-            Spacer()
-        }
-        .padding()
-        .background(selected ? Color.blue : Color.gray.opacity(0.2))
-        .cornerRadius(8)
-        .buttonStyle(PlainButtonStyle())
-    }
-}
-
-// MARK: The play button for the Audio Showcase
-struct PlayButton: View {
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "play.circle.fill")
-                .font(.title)
-                .foregroundColor(.blue)
-        }
-        .buttonStyle(BorderlessButtonStyle())
-    }
-}
-
-// MARK: A settings button view
-struct SettingsButton: View {
-    let title: String
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.body)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-        }
-        .padding(.top, 16)
-    }
-}
-
-// MARK: Displays the privacy policy
-struct PrivacyPolicyView: View {
-    var body: some View {
-        VStack {
-            Text("Privacy Policy")
-                .font(.headline)
-                .padding(.top)
-            ScrollView {
-                Text("Assistant for Apple Watch sends all your queries to ChatGPT (Voice) and Perplexity (Text). Therefore this application's privacy is governed by OpenAI's privacy policy and Perplexity's privacy policy. This app does not collect any personal information or data.")
-                    .padding()
+        .alert("Clear Memory", isPresented: $showingClearConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Clear", role: .destructive) {
+                chatMemory.clearMemory()
+                WKInterfaceDevice.current().play(.click)
             }
-        }
-    }
-}
-
- // MARK: How to use View
-struct TutorialView: View {
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Tutorial")
-                    .font(.title)
-                    .bold()
-                    .padding(.bottom)
-
-                Text("Here's a brief guide on how to use the app:")
-                    .font(.headline)
-
-                Text("1. On the time screen start holding to talk")
-                Text("2. Release your finger to send the message")
-                Text("3. Tap on the response text to go back to the clock screen")
-                Text("4. Adjust volume with the volume button")
-                Text("5. Go to settings to customize assistant name and voice")
-
-                Spacer()
-            }
-            .padding()
+        } message: {
+            Text("This will delete all conversation history. This action cannot be undone.")
         }
     }
 }
