@@ -7,6 +7,8 @@ Making your apple watch even more powerful!
 # Video Demo
 https://github.com/user-attachments/assets/3014b8ec-f642-4b99-b2aa-6d573df80a85
 
+<img width="1486" alt="image" src="https://github.com/user-attachments/assets/29fad996-daf0-4fa2-9c67-4e118d26ca35" />
+
 - Powered by Perplexity (Data and Responses) and ChatGPT (Whisper and TTS)
 > [!Tip]
 > If your looking for just the [Glow Animations](https://github.com/jacobamobin/AppleIntelligenceGlowEffect) you can find them here
