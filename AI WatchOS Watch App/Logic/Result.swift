@@ -7,110 +7,123 @@
 
 import Foundation
 
-// MARK: Uses the perplexity API to get a response to the user's question
-func sendRequest(userPrompt: String) -> String {
-    // Load api key from Config.plist
-    let apiKey: String = loadAPIKey() ?? "Invalid API Key"
-    // Get assistant name from UserDefaults
-    let assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
+class StreamManager: NSObject, URLSessionDataDelegate {
+    var onDataReceived: ((String) -> Void)?
+    var onCompletion: ((Error?) -> Void)?
     
-    // This is the URL for Perplexity
-    guard let url = URL(string: "https://api.perplexity.ai/chat/completions") else {
-        print("Invalid URL")
-        return "Error: Invalid URL"
+    private var session: URLSession!
+    private var buffer = ""
+    
+    // We need to keep a reference to the StreamManager
+    private var streamManager: StreamManager?
+
+    override init() {
+        super.init()
+        let configuration = URLSessionConfiguration.default
+        self.session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
     }
     
-    // Start building the Request
-    var request = URLRequest(url: url)
-    request.httpMethod = "POST"
-    request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization") // Using apiKey instead of perplexityApiKey
-    request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-    
-    // Payload for the API with parameters as defined on Perplexity's API documentation
-    let payload: [String: Any] = [
-        "model": "sonar-pro",
-        "messages": [
-            ["role": "system", "content": "Dont greet the user get to the point. Your name is \(assistantName) and you are a WatchOS assistant on the user's wrist, act like you are having a normal conversation with the user, and answer any questions the user asks. Be a helpful, useful assistant and remember your name is \(assistantName), Keep your answers under 150 words if possible. If you get a sound error, like 0.1 seconds related, ignore it and return 'I couldn't hear that, sorry'."],
-            ["role": "user", "content": userPrompt]
-        ],
-        "max_tokens": 300,
-        "temperature": 0.2,
-        "top_p": 0.9,
-        "return_images": false,
-        "return_related_questions": false,
-        "search_recency_filter": "month",
-        "top_k": 0,
-        "stream": false,
-        "presence_penalty": 0,
-        "frequency_penalty": 1
-    ]
-    
-    // Send the request
-    do {
-        request.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [])
-    } catch {
-        print("Error serializing JSON payload: \(error.localizedDescription)")
-        return "Error: Failed to serialize JSON payload"
-    }
-    
-    var responseText = ""
-    
-    // Capture self weakly to avoid retain cycles
-    let semaphore = DispatchSemaphore(value: 0) // To wait for the completion of the async call
-    
-    URLSession.shared.dataTask(with: request) { data, response, error in
-        if let error = error {
-            print("Error making API call: \(error.localizedDescription)")
-            responseText = "Error: \(error.localizedDescription)"
-            semaphore.signal()
+    func sendRequest(userPrompt: String) {
+        self.streamManager = self
+        buffer = "" // Reset buffer for new request
+        let apiKey: String = loadAPIKey() ?? "Invalid API Key"
+        let assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
+        
+        guard let url = URL(string: "https://api.perplexity.ai/chat/completions") else {
+            print("Invalid URL")
+            onCompletion?(NSError(domain: "Result.swift", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]))
             return
         }
         
-        guard let data = data else {
-            print("No data received")
-            responseText = "Error: No data received from server."
-            semaphore.signal()
-            return
-        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        // Debugging: Print the raw response
-        if let responseString = String(data: data, encoding: .utf8) {
-            print("Raw response: \(responseString)")
-        }
+        let payload: [String: Any] = [
+            "model": "sonar-pro",
+            "messages": [
+                ["role": "system", "content": "Dont greet the user get to the point. Your name is \(assistantName) and you are a WatchOS assistant on the user's wrist, act like you are having a normal conversation with the user, and answer any questions the user asks. Be a helpful, useful assistant and remember your name is \(assistantName), Keep your answers under 150 words if possible. If you get a sound error, like 0.1 seconds related, ignore it and return 'I couldn't hear that, sorry'."],
+                ["role": "user", "content": userPrompt]
+            ],
+            "max_tokens": 300,
+            "temperature": 0.2,
+            "top_p": 0.9,
+            "stream": true, // Enable streaming
+        ]
         
-        // Debugging and parsing
         do {
-            if let responseObject = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                // Check the structure of the response
-                print("Response JSON structure: \(responseObject)")
-                
-                // Try to parse the response based on expected structure
-                if let choices = responseObject["choices"] as? [[String: Any]],
-                   let firstChoice = choices.first,
-                   let message = firstChoice["message"] as? [String: Any],
-                   let content = message["content"] as? String {
-                    responseText = content
-                } else if let errorMessage = responseObject["error"] as? String {
-                    // Handle errors returned in response
-                    responseText = "API Error: \(errorMessage)"
-                } else {
-                    print("Unable to find expected keys in the response.")
-                    responseText = "Error decoding response."
-                }
-            } else {
-                print("Response is not valid JSON.")
-                responseText = "Error parsing server response."
-            }
+            request.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [])
         } catch {
-            print("Error decoding JSON response: \(error.localizedDescription)")
-            responseText = "Error decoding server response."
+            print("Error serializing JSON payload: \(error.localizedDescription)")
+            onCompletion?(error)
+            return
         }
-        semaphore.signal()
-    }.resume()
+        
+        let task = session.dataTask(with: request)
+        task.resume()
+    }
     
-    semaphore.wait() // Wait for the API call to finish
-    return RemoveCitations(prompt: responseText)
-    // TODO: Remove citations from return
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        guard let dataString = String(data: data, encoding: .utf8) else {
+            return
+        }
+        
+        // Add new data to buffer
+        buffer += dataString
+        
+        // Process complete lines in the buffer
+        let lines = buffer.components(separatedBy: .newlines)
+        
+        // Keep the last line in buffer (might be incomplete)
+        buffer = lines.last ?? ""
+        
+        // Process all complete lines except the last one
+        for line in lines.dropLast() {
+            if line.hasPrefix("data: ") {
+                let jsonString = String(line.dropFirst(6)) // Remove "data: " prefix
+                
+                if jsonString.trimmingCharacters(in: .whitespacesAndNewlines) == "[DONE]" {
+                    onCompletion?(nil)
+                    self.streamManager = nil
+                    return
+                }
+                
+                if !jsonString.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    if let jsonData = jsonString.data(using: .utf8) {
+                        do {
+                            if let json = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any],
+                               let choices = json["choices"] as? [[String: Any]],
+                               let firstChoice = choices.first,
+                               let delta = firstChoice["delta"] as? [String: Any],
+                               let content = delta["content"] as? String {
+                                DispatchQueue.main.async {
+                                    self.onDataReceived?(content)
+                                }
+                            }
+                        } catch {
+                            print("Error decoding chunk: \(error)")
+                            // Don't fail the entire stream for one bad chunk
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        onCompletion?(error)
+        self.streamManager = nil
+    }
+}
+
+
+// MARK: Uses the perplexity API to get a response to the user's question
+func sendRequest(userPrompt: String, onDataReceived: @escaping (String) -> Void, onCompletion: @escaping (Error?) -> Void) {
+    let streamManager = StreamManager()
+    streamManager.onDataReceived = onDataReceived
+    streamManager.onCompletion = onCompletion
+    streamManager.sendRequest(userPrompt: userPrompt)
 }
 
 // Helper function to load Perplexity API key from the plist
@@ -121,4 +134,4 @@ func loadAPIKey() -> String? {
         return apiKey
     }
     return nil
-}
+} 

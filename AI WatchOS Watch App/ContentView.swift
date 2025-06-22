@@ -20,7 +20,6 @@ struct ContentView: View {
     // recognizedText || Holds the text that OpenAI Transcribes from the microphone
     // tts || An instance of the TTS Handler
     // displayText || The response from Perplexity
-    // rewriteText || A Modified response from Perplexity that works best with TTS Models
     // isPressed || A boolean to tell if the user is tapping the screen
     // reactivateMic || Boolean that controls jumping from response
     @State private var assistantName: String = UserDefaults.standard.string(forKey: "AssistantName") ?? "Jarvis"
@@ -29,7 +28,6 @@ struct ContentView: View {
     @State private var recognizedText = ""
     @State private var tts = TTS()
     @State private var displayText = ""
-    @State private var rewriteText = ""
     @State private var isPressed = false
     @State private var reactivateMic = false
     @State private var isThinking = false // New state to track "thinking" animation
@@ -59,29 +57,42 @@ struct ContentView: View {
                     .onLongPressGesture(minimumDuration: 0.1, pressing: { isPressing in
                         if isPressing {
                             tts.stopPlayback()
-                            WKInterfaceDevice.current().play(.success)
                             Microphone.startRecording()
                             isPressed = true
                         } else {
                             withAnimation {
-                                // Transition to thinking state when the button is released
-                                WKInterfaceDevice.current().play(.success)
                                 isThinking = true // Show thinking animation
                                 isPressed = false // Hide assistant animation
                             }
                             
                             Microphone.stopRecording { text in
                                 recognizedText = text // Capture transcribed text
-                            
-                                displayText = sendRequest(userPrompt: recognizedText) // Fetch result
-                                WKInterfaceDevice.current().play(.success)
+                                displayText = "" // Clear previous response
+                                tts.stopPlayback() // Stop any ongoing TTS and clear buffers
+                                
+                                sendRequest(userPrompt: recognizedText, onDataReceived: { chunk in
+                                    DispatchQueue.main.async {
+                                        // Remove citations from display text
+                                        let cleanChunk = chunk.replacingOccurrences(of: "\\[\\d+\\]", with: "", options: .regularExpression)
+                                        displayText += cleanChunk
+                                        tts.addTextChunk(chunk, voice: selectedVoice) // TTS handles citation removal internally
+                                    }
+                                }, onCompletion: { error in
+                                    DispatchQueue.main.async {
+                                        if let error = error {
+                                            displayText = "Error: \(error.localizedDescription)"
+                                        } else {
+                                            // Additional cleanup for any remaining citations in display
+                                            displayText = displayText.replacingOccurrences(of: "\\[\\d+\\]", with: "", options: .regularExpression)
+                                            tts.finishText() // Process any remaining text in buffer
+                                        }
+                                        isThinking = false // Hide thinking animation after processing
+                                    }
+                                })
                                 
                                 withAnimation {
                                     state = true // Transition to Result view
-                                    WKInterfaceDevice.current().play(.success)
                                 }
-                                isThinking = false // Hide thinking animation after processing
-                                
                             }
                         }
                     }, perform: {})
@@ -115,8 +126,6 @@ struct ContentView: View {
                             .onLongPressGesture {
                                 withAnimation {
                                     tts.stopPlayback()
-                                    // Set reactivateMic flag to true to trigger mic reactivation
-                                    WKInterfaceDevice.current().play(.success)
                                     reactivateMic = true
                                     state = false // Transition to Home screen
                                 }
@@ -139,22 +148,11 @@ struct ContentView: View {
             // Reactivate the microphone if necessary after long press
             if newValue {
                 Microphone.startRecording()
-                WKInterfaceDevice.current().play(.click)
                 reactivateMic = false // Reset the flag after activation
             }
         }
-        .onChange(of: displayText) { newText in
-            // Trigger TTS to play audio when `displayText` is updated
-            if !newText.isEmpty {
-                tts.generateAndPlayAudio(from: sendRewriteRequest(prompt: displayText), voice: selectedVoice)
-            }
-            print(displayText)
-        }
     }
 }
-
-
-
 
 #Preview {
     ContentView()

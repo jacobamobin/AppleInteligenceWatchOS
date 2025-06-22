@@ -144,7 +144,7 @@ struct AssistantVoiceSelector: View {
                         PlayButton {
                             let selectedVoice = demoOptions.values.sorted()[index]
                             let greeting = "Hi, I'm \(assistantName), here to help you with your everyday needs."
-                            tts.generateAndPlayAudio(from: greeting, voice: selectedVoice)
+                            tts.speak(text: greeting, voice: selectedVoice)
                         }
                     }
                 }
